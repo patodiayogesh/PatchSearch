@@ -15,3 +15,5 @@ Patch-Dataset/tokenized_input
 *.model
 Evaluation/processesed_tokens
 results
+*.npy
+*.npy

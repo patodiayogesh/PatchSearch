@@ -15,10 +15,11 @@ def get_top_k_results(tokenizer, model, db_data, queries, k):
                                      db_data
                                     )
 
-    query_embeddings = create_gojo(tokenizer,
-                                     model,
-                                     queries
-                                     )
+    query_embeddings = db_data_embeddings
+    # query_embeddings = create_gojo(tokenizer,
+    #                                  model,
+    #                                  queries
+    #                                  )
 
     similarity_matrix = np.dot(db_data_embeddings,query_embeddings.T)
 
