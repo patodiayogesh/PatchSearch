@@ -1,0 +1,17 @@
+
+.DS_Store
+*.pt
+*.txt
+*.pkl
+*.buggy_only
+*.commit_msg
+*.fixed_only
+*.next_code
+*.prev_code
+Patch-Dataset/results
+Patch-Dataset/tokenized_input
+*.json
+*.bin
+*.model
+Evaluation/processesed_tokens
+results
