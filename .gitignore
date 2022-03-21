@@ -18,3 +18,7 @@ results
 *.npy
 *.npy
 *.npy
+*.xml
+*.iml
+*.npy
+*.npy
