@@ -23,6 +23,7 @@ def postprocess(add_padding = True, add_lang = True):
     with open('processesed_tokens', 'w') as f:
         f.writelines(tokens)
 
+
 if __name__ == '__main__':
 
     tokens_file_path = '/Users/neelampatodia/Desktop/Yogesh/PatchSearch/Patch-Dataset/tokenized_input'
