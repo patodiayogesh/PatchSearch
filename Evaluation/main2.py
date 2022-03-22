@@ -18,6 +18,7 @@ def create_gojo(tokenizer,
                 ):
     embeddings = []
     for j in range(len(train_set)):
+        print(j)
         code_encodings = tokenizer(train_set[j],
                                    return_tensors="pt")  # .to(device)
         with torch.no_grad():
@@ -54,7 +55,7 @@ def get_top_k_similarity_matrix(tokenizer,
     similarity_matrix = np.dot(db_data_embeddings, query_embeddings.T)
 
     np.save(filename, similarity_matrix)
-    similarity_matrix = np.load(filename)
+    #similarity_matrix = np.load(filename)
 
     similarity_matrix = torch.from_numpy(similarity_matrix)
     top_k_similarity_matrix = torch.topk(similarity_matrix, k, dim=1)
@@ -175,16 +176,17 @@ if __name__ == '__main__':
     # Prev_code
     # with open(code_ref_filepath, 'r') as f:
     #     db_data = f.readlines()
-    # db_data = db_data[:10]
-    # func_name(plbart_tokenizer, plbart_model, db_data, [], 11, 'similarity_matrix_prev.npy', 'results_prev.json', False)
+    # # db_data = db_data[:1000]
+    # func_name(plbart_tokenizer, plbart_model, db_data, [], 11,
+    #           'similarity_matrix_prev.npy', 'results_prev.json', False)
 
-    # buggy+nl_desc
+    # # buggy+nl_desc
     db_data = []
     with open(buggy_filepath, 'r') as f:
         db_data.append(f.readlines())
     with open(commit_msg_filepath, 'r') as f:
         db_data.append(f.readlines())
-
+    print(len(db_data[0]), len(db_data[1]))
     func_name(plbart_tokenizer, plbart_model, db_data, [], 11,
               'similarity_matrix_buggy_desc.npy',
               'results_buggy_desc.json', True)
