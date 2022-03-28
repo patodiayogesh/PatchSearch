@@ -7,6 +7,8 @@ import torch
 import torch.nn.functional as F
 import nltk
 from transformers import PLBartTokenizer, PLBartModel
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 
 def concatenate_data(data, token=' <b> '):
@@ -145,9 +147,14 @@ def calculate_edit_distance(top_k_results,
                 levenshtein_dist = nltk.edit_distance(fixed_only_data[i], fixed_only_data[index])
                 normalized_levenshtein_dist = levenshtein_dist/(max(len(fixed_only_data[i]), len(fixed_only_data[index])))
                 edit_distances.append(normalized_levenshtein_dist)
-        results.append([{'buggy_code': queries[0][i], 'commit_msg': queries[1][i]} if concatenate else query,
-                        d])
 
+    with open('edit_distances'+results_filename, 'rw') as f:
+        for elem in edit_distances:
+            f.write(str(elem) + "\n")
+
+    sns.distplot(edit_distances)
+    plt.show()
+    plt.savefig(results_filename+'_visualization')
     return edit_distances
 
 
