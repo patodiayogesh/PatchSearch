@@ -1,5 +1,6 @@
 import json
 import time
+from os import path
 
 import numpy as np
 import torch
@@ -41,21 +42,21 @@ def get_top_k_similarity_matrix(tokenizer,
                                 filename,
                                 concatenate=False,
                                 ):
-    db_data_embeddings = create_gojo(tokenizer,
-                                     model,
-                                     concatenate_data(db_data) if concatenate else db_data
-                                     )
+    # db_data_embeddings = create_gojo(tokenizer,
+    #                                  model,
+    #                                  concatenate_data(db_data) if concatenate else db_data
+    #                                  )
 
-    query_embeddings = db_data_embeddings
+    # query_embeddings = db_data_embeddings
     # query_embeddings = create_gojo(tokenizer,
     #                                  model,
     #                                  concatenate_data(queries) if concatenate else queries
     #                                  )
 
-    similarity_matrix = np.dot(db_data_embeddings, query_embeddings.T)
+    # similarity_matrix = np.dot(db_data_embeddings, query_embeddings.T)
 
-    np.save(filename, similarity_matrix)
-    #similarity_matrix = np.load(filename)
+    # np.save(filename, similarity_matrix)
+    similarity_matrix = np.load(filename)
 
     similarity_matrix = torch.from_numpy(similarity_matrix)
     top_k_similarity_matrix = torch.topk(similarity_matrix, k, dim=1)
@@ -146,29 +147,30 @@ def compare_embeddings(tokenizer,
 
 
 def load_model_and_tokenizer(device, tf_save_directory="uclanlp/plbart-base"):
-    tokenizer = PLBartTokenizer.from_pretrained(tf_save_directory,
+    tokenizer = PLBartTokenizer.from_pretrained('uclanlp/plbart-base',
                                                 src_lang="java", tgt_lang="java",
                                                 )
-    model = PLBartModel.from_pretrained(tf_save_directory)  # .to(device)
+    model = PLBartModel.from_pretrained('uclanlp/plbart-base')  # .to(device)
     model.eval()
 
     return tokenizer, model
 
 
 if __name__ == '__main__':
-    tokenized_input = '/Users/neelampatodia/Desktop/Yogesh/PatchSearch/Patch-Dataset/tokenized_input'
-    tf_save_directory = '/Users/neelampatodia/Desktop/Yogesh/PatchSearch/PLBART_model/'
-    code_embeddings_file_path = '/Users/neelampatodia/Desktop/Yogesh/PatchSearch/Patch-Dataset/code_embeddings.pkl'
-    code_ref_filepath = '/Users/neelampatodia/Desktop/Yogesh/PatchSearch/Patch-Dataset/small/train/data.prev_code'
+    basepath = path.dirname(__file__)
+    tokenized_input = path.abspath(path.join(basepath, "../Patch-Dataset/tokenized_input"))
+    tf_save_directory = path.abspath(path.join(basepath, "../PLBART_model/"))
+    code_embeddings_file_path = path.abspath(path.join(basepath, "../Patch-Dataset/code_embeddings.pkl"))
+    code_ref_filepath = path.abspath(path.join(basepath, "../Patch-Dataset/small/train/data.prev_code"))
+    
+    buggy_filepath = path.abspath(path.join(basepath, "../Patch-Dataset/small/train/data.buggy_only"))
+    commit_msg_filepath = path.abspath(path.join(basepath, "../Patch-Dataset/small/train/data.commit_msg"))
+    fixed_only_filepath = path.abspath(path.join(basepath, "../Patch-Dataset/small/train/data.fixed_only"))
+    next_code_filepath = path.abspath(path.join(basepath, "../Patch-Dataset/small/train/data.next_code"))
+    prev_code_filepath = path.abspath(path.join(basepath, "../Patch-Dataset/small/train/data.prev_code"))
 
-    buggy_filepath = '/Users/neelampatodia/Desktop/Yogesh/PatchSearch/Patch-Dataset/small/train/data.buggy_only'
-    commit_msg_filepath = '/Users/neelampatodia/Desktop/Yogesh/PatchSearch/Patch-Dataset/small/train/data.commit_msg'
-    fixed_only_filepath = '/Users/neelampatodia/Desktop/Yogesh/PatchSearch/Patch-Dataset/small/train/data.fixed_only'
-    next_code_filepath = '/Users/neelampatodia/Desktop/Yogesh/PatchSearch/Patch-Dataset/small/train/data.next_code'
-    prev_code_filepath = '/Users/neelampatodia/Desktop/Yogesh/PatchSearch/Patch-Dataset/small/train/data.prev_code'
-
-    score_file_path = '/Users/neelampatodia/Desktop/Yogesh/PatchSearch/Evaluation/top_k_results_2.json'
-    code_encodings_file_path = '/Users/neelampatodia/Desktop/Yogesh/PatchSearch/Patch-Dataset/code_encodings.pkl'
+    score_file_path = path.abspath(path.join(basepath, "../Evaluation/top_k_results_2.json"))
+    code_encodings_file_path = path.abspath(path.join(basepath, "../Patch-Dataset/code_encodings.pkl"))
 
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
     plbart_tokenizer, plbart_model = load_model_and_tokenizer(device)
@@ -176,8 +178,8 @@ if __name__ == '__main__':
     # Prev_code
     # with open(code_ref_filepath, 'r') as f:
     #     db_data = f.readlines()
-    # # db_data = db_data[:1000]
-    # func_name(plbart_tokenizer, plbart_model, db_data, [], 11,
+
+    # func_name(plbart_tokenizer, plbart_model, db_data, [], 11,  
     #           'similarity_matrix_prev.npy', 'results_prev.json', False)
 
     # # buggy+nl_desc
@@ -186,7 +188,8 @@ if __name__ == '__main__':
         db_data.append(f.readlines())
     with open(commit_msg_filepath, 'r') as f:
         db_data.append(f.readlines())
-    print(len(db_data[0]), len(db_data[1]))
+        
+        
     func_name(plbart_tokenizer, plbart_model, db_data, [], 11,
               'similarity_matrix_buggy_desc.npy',
               'results_buggy_desc.json', True)
