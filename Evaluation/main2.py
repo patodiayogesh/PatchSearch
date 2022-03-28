@@ -5,6 +5,7 @@ from os import path
 import numpy as np
 import torch
 import torch.nn.functional as F
+import nltk
 from transformers import PLBartTokenizer, PLBartModel
 
 
@@ -110,6 +111,46 @@ def map_top_k_results(top_k_results,
     print('Saved top k results', time.time() - start_time)
     return results
 
+def calculate_edit_distance(top_k_results,
+                            queries,
+                            results_filename,
+                            concatenate,
+                            ):
+
+    with open(code_ref_filepath, 'r') as f:
+        prev_code = f.readlines()
+    with open(buggy_filepath, 'r') as f:
+        buggy_data = f.readlines()
+    with open(commit_msg_filepath, 'r') as f:
+        commit_msg_data = f.readlines()
+    with open(fixed_only_filepath, 'r') as f:
+        fixed_only_data = f.readlines()
+    with open(next_code_filepath, 'r') as f:
+        next_code_data = f.readlines()
+
+    start_time = time.time()
+    top_k_indices = top_k_results.indices.data
+    top_k_scores = top_k_results.values.data
+    results = []
+
+    edit_distances = []
+
+    for i, query in enumerate(queries if not concatenate else queries[0]):
+
+        d = []
+        indices = top_k_indices[i]
+        scores = top_k_scores[i]
+        for index, score in zip(indices, scores):
+            if index != i:
+                levenshtein_dist = nltk.edit_distance(fixed_only_data[i], fixed_only_data[index])
+                normalized_levenshtein_dist = levenshtein_dist/(max(len(fixed_only_data[i]), len(fixed_only_data[index])))
+                edit_distances.append(normalized_levenshtein_dist)
+        results.append([{'buggy_code': queries[0][i], 'commit_msg': queries[1][i]} if concatenate else query,
+                        d])
+
+    return edit_distances
+
+
 
 def func_name(tokenizer,
               model,
@@ -129,11 +170,19 @@ def func_name(tokenizer,
                                                           concatenate)
     print('Obtained top k results', time.time() - start_time)
 
-    return map_top_k_results(top_k_similarity_matrix,
-                             queries,
-                             results_filename,
-                             concatenate,
-                             )
+    # return map_top_k_results(top_k_similarity_matrix,
+    #                          queries,
+    #                          results_filename,
+    #                          concatenate,
+    #                          )
+
+    return calculate_edit_distance(top_k_similarity_matrix,
+                                    queries,
+                                    results_filename,
+                                    concatenate,
+                                    )
+
+
 
 
 def compare_embeddings(tokenizer,
@@ -176,20 +225,20 @@ if __name__ == '__main__':
     plbart_tokenizer, plbart_model = load_model_and_tokenizer(device)
 
     # Prev_code
-    # with open(code_ref_filepath, 'r') as f:
-    #     db_data = f.readlines()
+    with open(code_ref_filepath, 'r') as f:
+        db_data = f.readlines()
 
-    # func_name(plbart_tokenizer, plbart_model, db_data, [], 11,  
-    #           'similarity_matrix_prev.npy', 'results_prev.json', False)
+    func_name(plbart_tokenizer, plbart_model, db_data, [], 11,
+              'similarity_matrix_prev.npy', 'results_prev.json', False)
 
     # # buggy+nl_desc
-    db_data = []
-    with open(buggy_filepath, 'r') as f:
-        db_data.append(f.readlines())
-    with open(commit_msg_filepath, 'r') as f:
-        db_data.append(f.readlines())
-        
-        
-    func_name(plbart_tokenizer, plbart_model, db_data, [], 11,
-              'similarity_matrix_buggy_desc.npy',
-              'results_buggy_desc.json', True)
+    # db_data = []
+    # with open(buggy_filepath, 'r') as f:
+    #     db_data.append(f.readlines())
+    # with open(commit_msg_filepath, 'r') as f:
+    #     db_data.append(f.readlines())
+    #
+    #
+    # func_name(plbart_tokenizer, plbart_model, db_data, [], 11,
+    #           'similarity_matrix_buggy_desc.npy',
+    #           'results_buggy_desc.json', True)
