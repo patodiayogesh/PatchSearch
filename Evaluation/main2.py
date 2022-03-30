@@ -148,7 +148,7 @@ def calculate_edit_distance(top_k_results,
                 normalized_levenshtein_dist = levenshtein_dist/(max(len(fixed_only_data[i]), len(fixed_only_data[index])))
                 edit_distances.append(normalized_levenshtein_dist)
 
-    with open('edit_distances'+results_filename, 'rw') as f:
+    with open('edit_distances'+results_filename, 'w') as f:
         for elem in edit_distances:
             f.write(str(elem) + "\n")
 
