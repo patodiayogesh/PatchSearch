@@ -1,17 +1,13 @@
-from os import path
-
-import json
 import time
 from os import path
-
-import numpy as np
-import torch
-import torch.nn.functional as F
-import nltk
-from transformers import PLBartTokenizer, PLBartModel
-import seaborn as sns
-import matplotlib.pyplot as plt
 from os.path import exists
+
+import matplotlib.pyplot as plt
+import nltk
+import numpy as np
+import seaborn as sns
+import torch
+from transformers import PLBartTokenizer, PLBartModel
 
 func_arguments = {}
 
@@ -22,18 +18,35 @@ def concatenate_data(data, token=' <b> '):
 
 def create_filename_with_k():
     global func_arguments
-    return '_' + func_arguments['dataset_size'] \
-           + '_' + func_arguments['src_lang'] \
-           + '_' + func_arguments['tgt_lang'] \
-           + '_' + func_arguments['db_data_filename'] \
-           + '_' + str(func_arguments['k'])
+    if not func_arguments['concatenate']:
+        return '_' + func_arguments['dataset_size'] \
+               + '_' + func_arguments['src_lang'] \
+               + '_' + func_arguments['tgt_lang'] \
+               + '_' + func_arguments['db_data_filename'] \
+               + '_' + str(func_arguments['k'])
+
+    else:
+        db_data_filename = '_'.join(func_arguments['db_data_filename'])
+        return '_' + func_arguments['dataset_size'] \
+               + '_' + func_arguments['src_lang'] \
+               + '_' + func_arguments['tgt_lang'] \
+               + '_' + db_data_filename \
+               + '_' + str(func_arguments['k'])
 
 def create_filename():
     global func_arguments
-    return '_' + func_arguments['dataset_size'] \
-           + '_' + func_arguments['src_lang'] \
-           + '_' + func_arguments['tgt_lang'] \
-           + '_' + func_arguments['db_data_filename']
+    if not func_arguments['concatenate']:
+        return '_' + func_arguments['dataset_size'] \
+               + '_' + func_arguments['src_lang'] \
+               + '_' + func_arguments['tgt_lang'] \
+               + '_' + func_arguments['db_data_filename']
+
+    else:
+        db_data_filename = '_'.join(func_arguments['db_data_filename'])
+        return '_' + func_arguments['dataset_size'] \
+               + '_' + func_arguments['src_lang'] \
+               + '_' + func_arguments['tgt_lang'] \
+               + '_' + db_data_filename
 
 
 def create_load_embeddings(tokenizer,
@@ -134,17 +147,18 @@ def calculate_edit_distance(top_k_results,
 
     visualization_filename = 'visualization' + create_filename_with_k()
     sns.distplot(edit_distances)
-    plt.show()
     plt.savefig(visualization_filename)
+    plt.show()
 
 
-def func_name(tokenizer,
-              model,
-              db_data, queries,
-              k,
-              concatenate,
-              fixed_only_filepath
-              ):
+
+def compute_similarity_matrix_and_edit_dist(tokenizer,
+                                            model,
+                                            db_data, queries,
+                                            k,
+                                            concatenate,
+                                            fixed_only_filepath
+                                            ):
     if not queries:
         queries = db_data
 
@@ -181,12 +195,12 @@ def load_model_and_tokenizer(device, source_lang, target_lang,
     return tokenizer, model
 
 
-def call_func(dataset_size,
-              src_lang, tgt_lang,
-              db_data_filename,
-              k,
-              concatenate
-              ):
+def evaluate(dataset_size,
+             src_lang, tgt_lang,
+             db_data_filename,
+             k,
+             concatenate
+             ):
 
     basepath = path.dirname(__file__)
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
@@ -211,29 +225,40 @@ def call_func(dataset_size,
             db_data.append(f.readlines())
         with open(filepaths[db_data_filename[1]], 'r') as f:
             db_data.append(f.readlines())
+
+        db_data[0] = db_data[0][:100]
+        db_data[1] = db_data[1][:100]
+
     else:
         with open(filepaths[db_data_filename], 'r') as f:
             db_data = f.readlines()
-        db_data = db_data[:10]
+        db_data = db_data[:100]
 
-    func_name(plbart_tokenizer, plbart_model,
-              db_data, [], k,
-              concatenate,
-              filepaths['fixed_only'])
+    compute_similarity_matrix_and_edit_dist(plbart_tokenizer, plbart_model,
+                                            db_data, [], k,
+                                            concatenate,
+                                            filepaths['fixed_only'])
 
 
-def func():
+def main():
     variations = [
 
         dict(dataset_size='small',
              src_lang='java', tgt_lang='java',
              db_data_filename='prev_code',
              k=2,
-             concatenate=False)
+             concatenate=False),
+
+        dict(dataset_size='small',
+             src_lang='java', tgt_lang='java',
+             db_data_filename=['buggy_only','commit_msg'],
+             k=2,
+             concatenate=True),
     ]
     for variation in variations:
         global func_arguments
         func_arguments = variation
-        call_func(**func_arguments)
+        evaluate(**func_arguments)
 
-func()
+if __name__ == '__main__':
+    main()
