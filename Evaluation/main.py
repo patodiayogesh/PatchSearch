@@ -1,233 +1,355 @@
-import heapq
+import time
+from os import path
+from os.path import exists
 import json
-import pickle
 
+import matplotlib.pyplot as plt
+import nltk
+import numpy as np
+import seaborn as sns
 import torch
-from torch import nn
-import torch.nn.functional as F
-from fairseq.models.bart import BARTModel
-from fairseq.data import data_utils
 from transformers import PLBartTokenizer, PLBartModel
-from torch.utils.data import Dataset, DataLoader, TensorDataset
+
+func_arguments = {}
+
+def concatenate_data(data, token=' <b> '):
+    # Concatenate data when rading from multiple sources
+    return [x + token + y for x, y in zip(data[0], data[1])]
 
 
-def create_encodings(tokenizer, *model):
-    with open(tokenized_input, 'r') as f:
-        tokens = f.readlines()
+def create_filename_with_k():
+    global func_arguments
+    if not func_arguments['concatenate']:
+        return '_' + func_arguments['dataset_size'] \
+               + '_' + func_arguments['src_lang'] \
+               + '_' + func_arguments['tgt_lang'] \
+               + '_' + func_arguments['db_data_filename'] \
+               + '_' + str(func_arguments['k'])
 
-    code_encoding = []
-    for token in tokens:
-        token += ' <java>'
-        code_encoding.append(tokenizer(token, return_tensors="pt"))
+    else:
+        db_data_filename = '_'.join(func_arguments['db_data_filename'])
+        return '_' + func_arguments['dataset_size'] \
+               + '_' + func_arguments['src_lang'] \
+               + '_' + func_arguments['tgt_lang'] \
+               + '_' + db_data_filename \
+               + '_' + str(func_arguments['k'])
 
-    f = open(code_encodings_file_path, 'wb')
-    pickle.dump(code_encoding, f)
-    f.close()
+def create_filename():
+    global func_arguments
+    if not func_arguments['concatenate']:
+        return '_' + func_arguments['dataset_size'] \
+               + '_' + func_arguments['src_lang'] \
+               + '_' + func_arguments['tgt_lang'] \
+               + '_' + func_arguments['db_data_filename']
 
-    return None
-
-
-def checkpoint_load():
-
-
-    model = BARTModel.from_pretrained(
-        tf_save_directory,
-        checkpoint_file="checkpoint_11_100000.pt",
-        lang_dict='lang_dict.txt',
-    )
-    model.eval()
-
-    with open(tokenized_input, 'r') as f:
-        tokens = f.readlines()
-
-    # query = tokens[0]+' <java>'
-    # query = model.encode(query)
-
-    query = 'public java.lang.String getTotalEndDate () { return new java.text.SimpleDateFormat ( "yyyy-MM-dd" ) . format ( endDates [ ( ( endDates.length ) - 1 ) ] . getTime () ) ; } <java>'
-    query = model.encode(query)
-    # answers = tokens[1:30]
-    # batch_input = [query.split(' ') + answer.split(' ') for answer in answers]
-
-    with torch.no_grad():
-        # batch_input = data_utils.collate_tokens(
-        #     batch_input, model.model.encoder.dictionary.pad(), left_pad=False
-        # )
-        prediction = model.extract_features(query)
+    else:
+        db_data_filename = '_'.join(func_arguments['db_data_filename'])
+        return '_' + func_arguments['dataset_size'] \
+               + '_' + func_arguments['src_lang'] \
+               + '_' + func_arguments['tgt_lang'] \
+               + '_' + db_data_filename
 
 
-class Query_DB_Dataset(Dataset):
+def create_load_embeddings(tokenizer,
+                           model,
+                           train_set,
+                           embeddings_filename
+                           ):
+    '''
+    Function to create or load data embeddings
+    '''
+    if exists(embeddings_filename):
+        print(embeddings_filename +' exists')
+        embeddings = np.load(embeddings_filename)
+        return embeddings
 
-    def __init__(self, data):
-        self.data = data
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, idx):
-        return self.data[idx]
-
-
-def create_dataset(query_texts, db_texts):
-    dataset = [[query_texts[i], db_texts[j]]
-               for i in range(len(query_texts))
-               for j in range(len(db_texts))
-               ]
-
-    return dataset
-
-
-def get_token_encodings(tokenizer, data):
-    encodings = []
-    for x in data:
-        encodings.append(tokenizer(x,
-                                   padding=True,
-                                   return_tensors="pt")
-                         )
-
-    return Query_DB_Dataset(encodings)
-
-
-def get_top_k_results(tokenizer, model, queries=[], k=10):
-    with open(code_ref_filepath, 'r') as f:
-        db_data = f.readlines()
-
-    db_data = db_data[:100]
-
-    if not queries:
-        queries = db_data
-    create_gojo(tokenizer,
-                model,
-                db_data)
-
-    top_k_results = []
-
-    for i in range(len(queries)):
-        print('query: ', i)
-        count = 0
-        # query_db = create_dataset([queries[i]], db_data)
-        # encodings = get_token_encodings(tokenizer, query_db)
-        # dataloader = DataLoader(encodings, batch_size=64, shuffle=False, collate_fn= lambda x: x)
-
-        # compare_embeddings(tokenizer,
-        #                    model,
-        #                    dataloader,
-        #                    k,
-        #                    )
-
-        scores = compare_embeddings_for_loop(tokenizer,
-                                             model,
-                                             queries[i],
-                                             db_data,
-                                             k)
-
-        top_k_results.append(dict(query=queries[i],
-                                  similar_code=[dict(code=db_data[j],
-                                                     score=s.item())
-                                                for s, j in scores]))
-
-    with open(score_file_path, 'w') as f:
-        json.dump(top_k_results, f)
-
-
-def compare_embeddings_for_loop(tokenizer,
-                                model,
-                                query,
-                                db_data,
-                                k):
-    scores = []
-    count = 0
-    for j in range(len(db_data)):
-
-        print(j)
-        code_encodings = tokenizer([query, db_data[j]],
-                                   padding=True,
-                                   return_tensors="pt")  # .to(device)
-        with torch.no_grad():
-            embeddings = model(**code_encodings)
-        code_embeddings_1 = torch.mean(embeddings.last_hidden_state[0], dim=1)
-        code_embeddings_1 = code_embeddings_1.reshape(1, code_embeddings_1.shape[0])
-        code_embeddings_2 = torch.mean(embeddings.last_hidden_state[1], dim=1)
-        code_embeddings_2 = code_embeddings_2.reshape(1, code_embeddings_2.shape[0])
-
-        score = F.cosine_similarity(code_embeddings_1, code_embeddings_2)
-
-        if count < k:
-            scores.append((score, j))
-        elif count == k:
-            scores.append((score, j))
-            heapq.heapify(scores)
-        else:
-            heapq.heapreplace(scores, (score, j))
-
-        count += 1
-
-    return sorted(scores)
-
-def create_gojo(tokenizer,
-                model,
-                train_set,
-                ):
-
-
+    embeddings = []
     for j in range(len(train_set)):
-
         print(j)
         code_encodings = tokenizer(train_set[j],
                                    return_tensors="pt")  # .to(device)
         with torch.no_grad():
-            embeddings = model(**code_encodings)
-        code_embeddings_1 = torch.mean(embeddings.last_hidden_state, dim=0)
-        code_embeddings_1 = code_embeddings_1.reshape(1, code_embeddings_1.shape[0])
-        code_embeddings_2 = torch.mean(embeddings.last_hidden_state[1], dim=1)
-        code_embeddings_2 = code_embeddings_2.reshape(1, code_embeddings_2.shape[0])
+            code_embeddings = model(**code_encodings)
+        code_embeddings = torch.mean(code_embeddings.last_hidden_state, dim=1)
+        code_embeddings = code_embeddings.flatten()
 
-        score = F.cosine_similarity(code_embeddings_1, code_embeddings_2)
+        embeddings.append(code_embeddings.detach().cpu().numpy())
 
-
-    return sorted(scores)
-
-def compare_embeddings(tokenizer,
-                       model,
-                       dataloader,
-                       k):
-    for x in dataloader:
-        print(x)
-        embeddings = model(x)
-        print()
+    embeddings = np.array(embeddings)
+    np.save(embeddings_filename, embeddings)
+    return embeddings
 
 
-def load_model_and_tokenizer(device, tf_save_directory="uclanlp/plbart-base"):
-    tokenizer = PLBartTokenizer.from_pretrained(tf_save_directory, src_lang="java", tgt_lang="java")
-    model = PLBartModel.from_pretrained(tf_save_directory)  # .to(device)
+def get_top_k_similarity_matrix(tokenizer,
+                                model,
+                                db_data,
+                                queries,
+                                k,
+                                filename,
+                                concatenate=False,
+                                ):
+    '''
+    Compute similarity matrix between db and query embeddings
+    Similarity computed using Levenshtein distance
+    Return top-k results
+    '''
+    if exists(filename):
+        print(filename+' exists')
+        similarity_matrix = np.load(filename)
+    else:
+
+        embeddings_filename = 'embeddings_db_data' + create_filename() + '.npy'
+        db_data_embeddings = create_load_embeddings(tokenizer,
+                                                    model,
+                                                    concatenate_data(db_data) if concatenate else db_data,
+                                                    embeddings_filename
+                                                    )
+
+        query_embeddings = db_data_embeddings
+        # query_embeddings = create_load_embeddings(tokenizer,
+        #                                           model,
+        #                                           concatenate_data(queries) if concatenate else queries,
+        #                                           embeddings_filename
+        #                                           )
+
+        similarity_matrix = np.dot(db_data_embeddings, query_embeddings.T)
+        np.save(filename, similarity_matrix)
+
+    similarity_matrix = torch.from_numpy(similarity_matrix)
+    top_k_similarity_matrix = torch.topk(similarity_matrix, k, dim=1)
+
+    return top_k_similarity_matrix
+
+def map_top_k_results(top_k_results,
+                      queries,
+                      results_filename,
+                      concatenate,
+                      ):
+    '''
+    Function to map fixed code, buggy code, commit message, prev code
+    for queries
+    '''
+
+    with open(code_ref_filepath, 'r') as f:
+        prev_code = f.readlines()
+    with open(buggy_filepath, 'r') as f:
+        buggy_data = f.readlines()
+    with open(commit_msg_filepath, 'r') as f:
+        commit_msg_data = f.readlines()
+    with open(fixed_only_filepath, 'r') as f:
+        fixed_only_data = f.readlines()
+    with open(next_code_filepath, 'r') as f:
+        next_code_data = f.readlines()
+
+    start_time = time.time()
+    top_k_indices = top_k_results.indices.data
+    top_k_scores = top_k_results.values.data
+    results = []
+
+    for i, query in enumerate(queries if not concatenate else queries[0]):
+
+        d = []
+        indices = top_k_indices[i]
+        scores = top_k_scores[i]
+        for index, score in zip(indices, scores):
+            if index != i:
+                d.append({'prev_code': prev_code[index],
+                          'score': score.cpu().detach().item(),
+                          'buggy_code': buggy_data[index],
+                          'commit_msg': commit_msg_data[index],
+                          'fixed_code': fixed_only_data[index],
+                          'next_code': next_code_data[index],
+                          })
+
+        results.append([{'buggy_code': queries[0][i], 'commit_msg': queries[1][i]} if concatenate else query,
+                        d])
+
+    with open(results_filename, 'w') as f:
+        f.write(json.dumps(results))
+
+    print('Saved top k results', time.time() - start_time)
+    return results
+
+
+def calculate_edit_distance(top_k_results,
+                            queries,
+                            concatenate,
+                            fixed_only_filepath
+                            ):
+    
+    # Compute Normalized Levenshtein distance for top-k results
+    # Plot distance distribution
+    edit_distance_filename = 'edit_distances' + create_filename_with_k()
+    
+    if exists(edit_distance_filename):
+        print(edit_distance_filename, ' exists')
+        edit_distances = []
+        f = open(edit_distance_filename,'r') 
+        for line in f:
+            edit_distances.append(line.strip('\n'))
+        f.close()
+    else:
+        with open(fixed_only_filepath, 'r') as f:
+            fixed_only_data = f.readlines()
+
+        start_time = time.time()
+        top_k_indices = top_k_results.indices.data
+        top_k_scores = top_k_results.values.data
+        results = []
+
+        edit_distances = []
+
+        for i, query in enumerate(queries if not concatenate else queries[0]):
+
+            d = []
+            indices = top_k_indices[i]
+            scores = top_k_scores[i]
+            for index, score in zip(indices, scores):
+                if index != i:
+                    print(index, i)
+                    levenshtein_dist = nltk.edit_distance(fixed_only_data[i], fixed_only_data[index])
+                    normalized_levenshtein_dist = levenshtein_dist / (
+                        max(len(fixed_only_data[i]), len(fixed_only_data[index])))
+                    edit_distances.append(normalized_levenshtein_dist)
+
+        with open(edit_distance_filename, 'w') as f:
+            for elem in edit_distances:
+                f.write(str(elem) + "\n")
+
+    visualization_filename = 'visualization' + create_filename_with_k()
+    sns.distplot(edit_distances)
+    plt.savefig(visualization_filename)
+
+    return
+
+
+def compute_similarity_matrix_and_edit_dist(tokenizer,
+                                            model,
+                                            db_data, queries,
+                                            k,
+                                            concatenate,
+                                            fixed_only_filepath
+                                            ):
+    if not queries:
+        queries = db_data
+
+    similarity_matrix_filename = 'similarity_matrix'+create_filename()+'.npy'
+    start_time = time.time()
+    top_k_similarity_matrix = get_top_k_similarity_matrix(tokenizer, model, db_data,
+                                                          queries, k, similarity_matrix_filename,
+                                                          concatenate)
+    print('Obtained top k results', time.time() - start_time)
+
+    # return map_top_k_results(top_k_similarity_matrix,
+    #                          queries,
+    #                          results_filename,
+    #                          concatenate,
+    #                          )
+
+    return calculate_edit_distance(top_k_similarity_matrix,
+                                   queries,
+                                   concatenate,
+                                   fixed_only_filepath
+                                   )
+
+def load_model_and_tokenizer(device, source_lang, target_lang,
+                             tf_save_directory="uclanlp/plbart-base"
+                             ):
+    tokenizer = PLBartTokenizer.from_pretrained(tf_save_directory,
+                                                src_lang=source_lang,
+                                                tgt_lang=target_lang,
+                                                )
+    model = PLBartModel.from_pretrained('uclanlp/plbart-base')  # .to(device)
     model.eval()
 
     return tokenizer, model
 
 
-def combined_input(plbart_tokenizer, plbart_model):
-    code_encodings = plbart_tokenizer([query_1, query_2],
-                                      padding=True,
-                                      return_tensors="pt")
+def evaluate(dataset_size,
+             src_lang, tgt_lang,
+             db_data_filename,
+             k,
+             concatenate
+             ):
 
-    outputs = plbart_model(**code_encodings)
-    code_encodings_1 = outputs.last_hidden_state[0]
-    code_encodings_2 = outputs.last_hidden_state[1]
+    basepath = path.dirname(__file__)
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-    score = F.cosine_similarity(code_encodings_1, code_encodings_2)
+    filepaths = {}
+    filepaths['buggy_only'] = path.abspath(
+        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/train/data.buggy_only"))
+    filepaths['commit_msg'] = path.abspath(
+        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/train/data.commit_msg"))
+    filepaths['fixed_only'] = path.abspath(
+        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/train/data.fixed_only"))
+    filepaths['next_code'] = path.abspath(
+        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/train/data.next_code"))
+    filepaths['prev_code'] = path.abspath(
+        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/train/data.prev_code"))
 
-    print(score)
-    print(outputs)
+    # Create PLBART model and tokenizer
+    plbart_tokenizer, plbart_model = load_model_and_tokenizer(device, src_lang, tgt_lang)
 
+    if concatenate:
+        db_data = []
+        with open(filepaths[db_data_filename[0]], 'r') as f:
+            db_data.append(f.readlines())
+        with open(filepaths[db_data_filename[1]], 'r') as f:
+            db_data.append(f.readlines())
+
+        # db_data[0] = db_data[0][:100]
+        # db_data[1] = db_data[1][:100]
+
+    else:
+        with open(filepaths[db_data_filename], 'r') as f:
+            db_data = f.readlines()
+        # db_data = db_data[:100]
+
+    # Compute the similarity matrix and edit distance
+    compute_similarity_matrix_and_edit_dist(plbart_tokenizer, plbart_model,
+                                            db_data, [], k,
+                                            concatenate,
+                                            filepaths['fixed_only'])
+    
+    del plbart_tokenizer
+    del plbart_model
+    
+    return
+
+def main():
+    variations = [
+
+        # dict(dataset_size='small',
+        #      src_lang='java', tgt_lang='java',
+        #      db_data_filename='prev_code',
+        #      k=11,
+        #      concatenate=False),
+
+        # dict(dataset_size='small',
+        #      src_lang='java', tgt_lang='java',
+        #      db_data_filename=['buggy_only','commit_msg'],
+        #      k=11,
+        #      concatenate=True),
+        
+        # dict(dataset_size='small',
+        #      src_lang='java', tgt_lang='java',
+        #      db_data_filename='prev_code',
+        #      k=2,
+        #      concatenate=False),
+        
+        # dict(dataset_size='small',
+        #      src_lang='java', tgt_lang='java',
+        #      db_data_filename=['buggy_only','commit_msg'],
+        #      k=2,
+        #      concatenate=True),
+
+    ]
+
+    for variation in variations:
+        global func_arguments
+        func_arguments = variation
+        evaluate(**func_arguments)
+        #gc.collect()
 
 if __name__ == '__main__':
-    tokenized_input = '/Users/neelampatodia/Desktop/Yogesh/PatchSearch/Patch-Dataset/tokenized_input'
-    tf_save_directory = '/Users/neelampatodia/Desktop/Yogesh/PatchSearch/PLBART_model/'
-    code_embeddings_file_path = '/Users/neelampatodia/Desktop/Yogesh/PatchSearch/Patch-Dataset/code_embeddings.pkl'
-    code_ref_filepath = '/Users/neelampatodia/Desktop/Yogesh/PatchSearch/Patch-Dataset/small/train/data.prev_code'
-    score_file_path = '/Users/neelampatodia/Desktop/Yogesh/PatchSearch/Evaluation/top_k_results_2.json'
-    code_encodings_file_path = '/Users/neelampatodia/Desktop/Yogesh/PatchSearch/Patch-Dataset/code_encodings.pkl'
-
-    device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    plbart_tokenizer, plbart_model = load_model_and_tokenizer(device)
-    get_top_k_results(plbart_tokenizer, plbart_model)
-    # compare_embeddings(plbart_tokenizer, plbart_model)
+    main()
