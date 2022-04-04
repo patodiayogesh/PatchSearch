@@ -24,14 +24,17 @@ def create_filename_with_k():
                + '_' + func_arguments['src_lang'] \
                + '_' + func_arguments['tgt_lang'] \
                + '_' + func_arguments['db_data_filename'] \
+               + '_' + func_arguments['query_filename'] \
                + '_' + str(func_arguments['k'])
 
     else:
         db_data_filename = '_'.join(func_arguments['db_data_filename'])
+        query_filename = '_'.join(func_arguments['query_filename'])
         return '_' + func_arguments['dataset_size'] \
                + '_' + func_arguments['src_lang'] \
                + '_' + func_arguments['tgt_lang'] \
                + '_' + db_data_filename \
+               + '_' + query_filename \
                + '_' + str(func_arguments['k'])
 
 def create_filename():
@@ -40,14 +43,17 @@ def create_filename():
         return '_' + func_arguments['dataset_size'] \
                + '_' + func_arguments['src_lang'] \
                + '_' + func_arguments['tgt_lang'] \
-               + '_' + func_arguments['db_data_filename']
+               + '_' + func_arguments['db_data_filename'] \
+               + '_' + func_arguments['query_filename']
 
     else:
         db_data_filename = '_'.join(func_arguments['db_data_filename'])
+        query_filename = '_'.join(func_arguments['query_filename'])
         return '_' + func_arguments['dataset_size'] \
                + '_' + func_arguments['src_lang'] \
                + '_' + func_arguments['tgt_lang'] \
-               + '_' + db_data_filename
+               + '_' + db_data_filename \
+               + '_' + query_filename
 
 
 def create_load_embeddings(tokenizer,
@@ -105,12 +111,13 @@ def get_top_k_similarity_matrix(tokenizer,
                                                     embeddings_filename
                                                     )
 
-        query_embeddings = db_data_embeddings
-        # query_embeddings = create_load_embeddings(tokenizer,
-        #                                           model,
-        #                                           concatenate_data(queries) if concatenate else queries,
-        #                                           embeddings_filename
-        #                                           )
+        # query_embeddings = db_data_embeddings
+        embeddings_filename = 'embeddings_query' + create_filename() + '.npy'
+        query_embeddings = create_load_embeddings(tokenizer,
+                                                  model,
+                                                  concatenate_data(queries) if concatenate else queries,
+                                                  embeddings_filename
+                                                  )
 
         similarity_matrix = np.dot(db_data_embeddings, query_embeddings.T)
         np.save(filename, similarity_matrix)
@@ -174,7 +181,8 @@ def map_top_k_results(top_k_results,
 def calculate_edit_distance(top_k_results,
                             queries,
                             concatenate,
-                            fixed_only_filepath
+                            db_fixed_only_filepath,
+                            query_fixed_only_filepath
                             ):
     
     # Compute Normalized Levenshtein distance for top-k results
@@ -189,28 +197,29 @@ def calculate_edit_distance(top_k_results,
             edit_distances.append(line.strip('\n'))
         f.close()
     else:
-        with open(fixed_only_filepath, 'r') as f:
-            fixed_only_data = f.readlines()
+        with open(db_fixed_only_filepath, 'r') as f:
+            db_fixed_only_data = f.readlines()
+        with open(query_fixed_only_filepath, 'r') as f:
+            query_fixed_only_data = f.readlines()
 
-        start_time = time.time()
         top_k_indices = top_k_results.indices.data
         top_k_scores = top_k_results.values.data
-        results = []
 
         edit_distances = []
 
-        for i, query in enumerate(queries if not concatenate else queries[0]):
+        for i, _ in enumerate(queries if not concatenate else queries[0]):
 
-            d = []
             indices = top_k_indices[i]
             scores = top_k_scores[i]
-            for index, score in zip(indices, scores):
-                if index != i:
-                    print(index, i)
-                    levenshtein_dist = nltk.edit_distance(fixed_only_data[i], fixed_only_data[index])
-                    normalized_levenshtein_dist = levenshtein_dist / (
-                        max(len(fixed_only_data[i]), len(fixed_only_data[index])))
-                    edit_distances.append(normalized_levenshtein_dist)
+            temp_edit_distances = []
+            for index, _ in zip(indices, scores):
+                # if index != i:
+                print(index, i)
+                levenshtein_dist = nltk.edit_distance(query_fixed_only_data[i], db_fixed_only_data[index])
+                normalized_levenshtein_dist = levenshtein_dist / (
+                    max(len(query_fixed_only_data[i]), len(db_fixed_only_data[index])))
+                temp_edit_distances.append(normalized_levenshtein_dist)
+            edit_distances.append(min(temp_edit_distances))
 
         with open(edit_distance_filename, 'w') as f:
             for elem in edit_distances:
@@ -228,7 +237,8 @@ def compute_similarity_matrix_and_edit_dist(tokenizer,
                                             db_data, queries,
                                             k,
                                             concatenate,
-                                            fixed_only_filepath
+                                            db_fixed_only_filepath,
+                                            query_fixed_only_filepath
                                             ):
     if not queries:
         queries = db_data
@@ -249,7 +259,8 @@ def compute_similarity_matrix_and_edit_dist(tokenizer,
     return calculate_edit_distance(top_k_similarity_matrix,
                                    queries,
                                    concatenate,
-                                   fixed_only_filepath
+                                   db_fixed_only_filepath,
+                                   query_fixed_only_filepath
                                    )
 
 def load_model_and_tokenizer(device, source_lang, target_lang,
@@ -268,6 +279,7 @@ def load_model_and_tokenizer(device, source_lang, target_lang,
 def evaluate(dataset_size,
              src_lang, tgt_lang,
              db_data_filename,
+             query_filename,
              k,
              concatenate
              ):
@@ -275,41 +287,67 @@ def evaluate(dataset_size,
     basepath = path.dirname(__file__)
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-    filepaths = {}
-    filepaths['buggy_only'] = path.abspath(
+    db_filepaths = {}
+    db_filepaths['buggy_only'] = path.abspath(
         path.join(basepath, "../Patch-Dataset/" + dataset_size + "/train/data.buggy_only"))
-    filepaths['commit_msg'] = path.abspath(
+    db_filepaths['commit_msg'] = path.abspath(
         path.join(basepath, "../Patch-Dataset/" + dataset_size + "/train/data.commit_msg"))
-    filepaths['fixed_only'] = path.abspath(
+    db_filepaths['fixed_only'] = path.abspath(
         path.join(basepath, "../Patch-Dataset/" + dataset_size + "/train/data.fixed_only"))
-    filepaths['next_code'] = path.abspath(
+    db_filepaths['next_code'] = path.abspath(
         path.join(basepath, "../Patch-Dataset/" + dataset_size + "/train/data.next_code"))
-    filepaths['prev_code'] = path.abspath(
+    db_filepaths['prev_code'] = path.abspath(
         path.join(basepath, "../Patch-Dataset/" + dataset_size + "/train/data.prev_code"))
+    
+    query_filepaths = {}
+    query_filepaths['buggy_only'] = path.abspath(
+        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/test/data.buggy_only"))
+    query_filepaths['commit_msg'] = path.abspath(
+        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/test/data.commit_msg"))
+    query_filepaths['fixed_only'] = path.abspath(
+        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/test/data.fixed_only"))
+    query_filepaths['next_code'] = path.abspath(
+        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/test/data.next_code"))
+    query_filepaths['prev_code'] = path.abspath(
+        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/test/data.prev_code"))
 
     # Create PLBART model and tokenizer
     plbart_tokenizer, plbart_model = load_model_and_tokenizer(device, src_lang, tgt_lang)
 
     if concatenate:
         db_data = []
-        with open(filepaths[db_data_filename[0]], 'r') as f:
+        print("let us see\n")
+        print(db_filepaths[db_data_filename[0]])
+        with open(db_filepaths[db_data_filename[0]], 'r') as f:
             db_data.append(f.readlines())
-        with open(filepaths[db_data_filename[1]], 'r') as f:
+        with open(db_filepaths[db_data_filename[1]], 'r') as f:
             db_data.append(f.readlines())
+        
+        queries = []
+        with open(query_filepaths[query_filename[0]], 'r') as f:
+            queries.append(f.readlines())
+        with open(query_filepaths[query_filename[1]], 'r') as f:
+            queries.append(f.readlines())
 
         # db_data[0] = db_data[0][:100]
         # db_data[1] = db_data[1][:100]
 
     else:
-        with open(filepaths[db_data_filename], 'r') as f:
+        with open(db_filepaths[db_data_filename], 'r') as f:
             db_data = f.readlines()
-        # db_data = db_data[:100]
+        
+        with open(query_filepaths[query_filename], 'r') as f:
+            queries = f.readlines()
+        
+        # db_data = db_data[:10000]
+        # queries = queries[:10]
 
     # Compute the similarity matrix and edit distance
     compute_similarity_matrix_and_edit_dist(plbart_tokenizer, plbart_model,
-                                            db_data, [], k,
+                                            db_data, queries, k,
                                             concatenate,
-                                            filepaths['fixed_only'])
+                                            db_filepaths['fixed_only'],
+                                            query_filepaths['fixed_only'])
     
     del plbart_tokenizer
     del plbart_model
@@ -342,6 +380,13 @@ def main():
         #      db_data_filename=['buggy_only','commit_msg'],
         #      k=2,
         #      concatenate=True),
+
+        dict(dataset_size='small',
+             src_lang='java', tgt_lang='java',
+             db_data_filename='fixed_only',
+             query_filename='fixed_only',
+             k=5,
+             concatenate=False),
 
     ]
 

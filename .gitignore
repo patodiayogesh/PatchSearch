@@ -28,3 +28,4 @@ results
 Evaluation/edit_distances_small_java_java_buggy_only_commit_msg_2
 Evaluation/edit_distances_small_java_java_prev_code_2
 *.png
+.idea/.name
