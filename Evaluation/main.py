@@ -110,6 +110,8 @@ def evaluate(dataset_size,
 
     elif method == 'tfidf':
         evaluator_obj = TfIdfEvaluator(dataset_size,
+                                       None,
+                                       None,
                                        db_data_filename,
                                        query_filename,
                                        k,
@@ -148,8 +150,8 @@ def evaluate(dataset_size,
         with open(evaluator_obj.query_filepaths[query_filename], 'r') as f:
             queries = f.readlines()
 
-        db_data = db_data[:100]
-        queries = queries[:10]
+        # db_data = db_data[:100]
+        # queries = queries[:10]
 
     evaluator_obj.db_data = db_data
     evaluator_obj.queries = queries
@@ -197,7 +199,7 @@ def main():
         #      query_filename='fixed_only',
         #      k=5,
         #      concatenate=False,
-        #      method='tfidf'),
+        #      method='plbart'),
 
         dict(dataset_size='small',
              src_lang=None, tgt_lang=None,
@@ -205,7 +207,7 @@ def main():
              query_filename='fixed_only',
              k=5,
              concatenate=False,
-             method='plbart'),
+             method='tfidf'),
 
     ]
 

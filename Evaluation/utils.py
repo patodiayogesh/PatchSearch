@@ -110,8 +110,8 @@ class Evaluator:
         """
         if not self.concatenate:
             return '_' + self.dataset_size \
-                   + '_' + self.src_lang \
-                   + '_' + self.tgt_lang \
+                   + '_' + str(self.src_lang) \
+                   + '_' + str(self.tgt_lang) \
                    + '_' + self.db_data_filename \
                    + '_' + self.query_filename \
                    + '_' + str(self.k)
@@ -120,8 +120,8 @@ class Evaluator:
             db_data_filename = '_'.join(self.db_data_filename)
             query_filename = '_'.join(self.query_filename)
             return '_' + self.dataset_size \
-                   + '_' + self.src_lang \
-                   + '_' + self.tgt_lang \
+                   + '_' + str(self.src_lang) \
+                   + '_' + str(self.tgt_lang) \
                    + '_' + db_data_filename \
                    + '_' + query_filename \
                    + '_' + str(self.k)
@@ -133,8 +133,8 @@ class Evaluator:
         """
         if not self.concatenate:
             return '_' + self.dataset_size \
-                   + '_' + self.src_lang \
-                   + '_' + self.tgt_lang \
+                   + '_' + str(self.src_lang) \
+                   + '_' + str(self.tgt_lang) \
                    + '_' + self.db_data_filename \
                    + '_' + self.query_filename
 
@@ -142,7 +142,7 @@ class Evaluator:
             db_data_filename = '_'.join(self.db_data_filename)
             query_filename = '_'.join(self.query_filename)
             return '_' + self.dataset_size \
-                   + '_' + self.src_lang \
-                   + '_' + self.tgt_lang \
+                   + '_' + str(self.src_lang) \
+                   + '_' + str(self.tgt_lang) \
                    + '_' + db_data_filename \
                    + '_' + query_filename

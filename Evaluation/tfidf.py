@@ -8,9 +8,8 @@ import numpy as np
 
 class TfIdfEvaluator(Evaluator):
 
-    def __init__(self, dataset_size, db_data_filename, query_filename, k, concatenate):
-        super().__init__(dataset_size, db_data_filename, query_filename, k, concatenate,
-                         src_lang=None, tgt_lang=None, )
+    def __init__(self, dataset_size, src_lang, tgt_lang, db_data_filename, query_filename, k, concatenate):
+        super().__init__(dataset_size, src_lang, tgt_lang, db_data_filename, query_filename, k, concatenate)
 
     def get_top_k_similarity_matrix(self,
                                     filename):
