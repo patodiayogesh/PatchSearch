@@ -77,10 +77,10 @@ class TfIdfEvaluator(Evaluator):
             db_corpus, vocab_size = self.gensim_tfidf_preprocess(self.db_data)
             tfidf_model = TfidfModel(db_corpus)
             db_data_vectors = tfidf_model[db_corpus]
-
+            print('DB TfIdf scores obtained')
             query_corpus, _ = self.gensim_tfidf_preprocess(self.queries)
             query_vectors = tfidf_model[query_corpus]
-
+            print('Query TfIdf scores obtained')
             # Get np array format of tfidf scores
             db_data_matrix = corpus2dense(db_data_vectors, vocab_size, len(self.db_data)).T
             query_matrix = corpus2dense(query_vectors, vocab_size, len(self.queries)).T
