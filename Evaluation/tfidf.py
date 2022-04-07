@@ -3,6 +3,7 @@ from gensim.models import TfidfModel
 from gensim.corpora import Dictionary
 from gensim.utils import simple_preprocess
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 from gensim.matutils import corpus2dense, corpus2csc
 from utils import Evaluator
 from os.path import exists
@@ -90,7 +91,7 @@ class TfIdfEvaluator(Evaluator):
             # sns.distplot(row)
             # plt.show()
 
-            similarity_matrix = np.dot(db_data_matrix, query_matrix.T)
+            similarity_matrix = cosine_similarity(db_data_matrix, query_matrix)
             np.save(filename, similarity_matrix)
 
         # Get top-k results
