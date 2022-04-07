@@ -1,7 +1,6 @@
 
 .DS_Store
 *.pt
-*.txt
 *.pkl
 *.buggy_only
 *.commit_msg
