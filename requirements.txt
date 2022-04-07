@@ -1,6 +1,6 @@
 submitit
 torch>=1.5.1
-sacrebleu==1.2.11
+sacrebleu>=1.4.12
 tree_sitter==0.2.1
 sentencepiece
 fairseq==0.10.0
