@@ -209,21 +209,21 @@ def main():
         #      concatenate=False,
         #      method='plbart'),
 
-        dict(dataset_size='small',
-             src_lang='java', tgt_lang='java',
-             db_data_filename='prev_code',
-             query_filename='prev_code',
-             k=5,
-             concatenate=False,
-             method='plbart'),
-
-        dict(dataset_size='small',
-             src_lang='java', tgt_lang='java',
-             db_data_filename='prev_code',
-             query_filename='prev_code',
-             k=1,
-             concatenate=False,
-             method='plbart')
+        # dict(dataset_size='small',
+        #      src_lang='java', tgt_lang='java',
+        #      db_data_filename='prev_code',
+        #      query_filename='prev_code',
+        #      k=5,
+        #      concatenate=False,
+        #      method='plbart'),
+        #
+        # dict(dataset_size='small',
+        #      src_lang='java', tgt_lang='java',
+        #      db_data_filename='prev_code',
+        #      query_filename='prev_code',
+        #      k=1,
+        #      concatenate=False,
+        #      method='plbart')
 
         # dict(dataset_size='small',
         #      src_lang=None, tgt_lang=None,
@@ -240,6 +240,22 @@ def main():
         #      k=1,
         #      concatenate=False,
         #      method='tfidf'),
+
+        dict(dataset_size='small',
+             src_lang=None, tgt_lang=None,
+             db_data_filename='prev_code',
+             query_filename='prev_code',
+             k=5,
+             concatenate=False,
+             method='tfidf'),
+
+        dict(dataset_size='small',
+             src_lang=None, tgt_lang=None,
+             db_data_filename='prev_code',
+             query_filename='prev_code',
+             k=1,
+             concatenate=False,
+             method='tfidf')
 
     ]
 
