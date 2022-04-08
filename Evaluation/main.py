@@ -142,6 +142,9 @@ def evaluate(dataset_size,
 
         # db_data[0] = db_data[0][:100]
         # db_data[1] = db_data[1][:100]
+        #
+        # queries[0] = queries[0][:10]
+        # queries[1] = queries[1][:10]
 
     else:
         with open(evaluator_obj.db_filepaths[db_data_filename], 'r') as f:
@@ -150,8 +153,8 @@ def evaluate(dataset_size,
         with open(evaluator_obj.query_filepaths[query_filename], 'r') as f:
             queries = f.readlines()
 
-        # db_data = db_data[:1000]
-        # queries = queries[:100]
+        # db_data = db_data[:100]
+        # queries = queries[:10]
 
     evaluator_obj.db_data = db_data
     evaluator_obj.queries = queries
@@ -223,7 +226,39 @@ def main():
         #      query_filename='prev_code',
         #      k=1,
         #      concatenate=False,
-        #      method='plbart')
+        #      method='plbart'),
+
+        dict(dataset_size='small',
+             src_lang='java', tgt_lang='java',
+             db_data_filename=['buggy_only','commit_msg'],
+             query_filename=['buggy_only','commit_msg'],
+             k=1,
+             concatenate=True,
+             method='plbart'),
+
+        dict(dataset_size='small',
+             src_lang='java', tgt_lang='java',
+             db_data_filename='buggy_only',
+             query_filename='buggy_only',
+             k=1,
+             concatenate=False,
+             method='plbart'),
+
+        dict(dataset_size='small',
+             src_lang='en_XX', tgt_lang='en_XX',
+             db_data_filename='commit_msg',
+             query_filename='commit_msg',
+             k=1,
+             concatenate=False,
+             method='plbart'),
+
+        dict(dataset_size='small',
+             src_lang='java', tgt_lang='java',
+             db_data_filename='commit_msg',
+             query_filename='commit_msg',
+             k=1,
+             concatenate=False,
+             method='plbart'),
 
         # dict(dataset_size='small',
         #      src_lang=None, tgt_lang=None,
@@ -241,21 +276,21 @@ def main():
         #      concatenate=False,
         #      method='tfidf'),
 
-        dict(dataset_size='small',
-             src_lang=None, tgt_lang=None,
-             db_data_filename='prev_code',
-             query_filename='prev_code',
-             k=5,
-             concatenate=False,
-             method='tfidf'),
-
-        dict(dataset_size='small',
-             src_lang=None, tgt_lang=None,
-             db_data_filename='prev_code',
-             query_filename='prev_code',
-             k=1,
-             concatenate=False,
-             method='tfidf')
+        # dict(dataset_size='small',
+        #      src_lang=None, tgt_lang=None,
+        #      db_data_filename='prev_code',
+        #      query_filename='prev_code',
+        #      k=5,
+        #      concatenate=False,
+        #      method='tfidf'),
+        #
+        # dict(dataset_size='small',
+        #      src_lang=None, tgt_lang=None,
+        #      db_data_filename='prev_code',
+        #      query_filename='prev_code',
+        #      k=1,
+        #      concatenate=False,
+        #      method='tfidf')
 
     ]
 
