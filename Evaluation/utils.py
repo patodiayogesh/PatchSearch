@@ -100,6 +100,7 @@ class Evaluator:
         # Plot and save graph
         sns.distplot(edit_distances)
         plt.savefig(visualization_filename)
+        plt.clf()
 
         return None
 

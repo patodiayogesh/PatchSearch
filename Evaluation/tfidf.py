@@ -17,8 +17,8 @@ class TfIdfEvaluator(Evaluator):
     def __init__(self, dataset_size, src_lang, tgt_lang, db_data_filename, query_filename, k, concatenate):
         super().__init__(dataset_size, src_lang, tgt_lang, db_data_filename, query_filename, k, concatenate)
 
-    def get_top_k_similarity_matrix(self,
-                                    filename):
+    def get_top_k_similarity_matrix_sklearn(self,
+                                            filename):
 
         """
         Compute similarity matrix between db and query tfidf vectors
@@ -109,8 +109,6 @@ class TfIdfEvaluator(Evaluator):
         corpus = [corpus_dict.doc2bow(line) for line in doc_tokenized]
 
         return corpus, corpus_dict, len(corpus_dict.keys())
-
-
 
     def calculate_edit_distance(self, top_k_similarity_matrix):
         """

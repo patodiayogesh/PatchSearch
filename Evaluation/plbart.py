@@ -1,6 +1,7 @@
 from utils import Evaluator, concatenate_data
 from transformers import PLBartTokenizer, PLBartModel
 from os.path import exists
+from sklearn.metrics.pairwise import cosine_similarity
 import torch
 import numpy as np
 
@@ -85,7 +86,7 @@ class PlBartEvaluator(Evaluator):
                 embeddings_filename
             )
 
-            similarity_matrix = np.dot(db_data_embeddings, query_embeddings.T)
+            similarity_matrix = cosine_similarity(db_data_embeddings, query_embeddings).T
             np.save(filename, similarity_matrix)
 
         # Get top-k results
