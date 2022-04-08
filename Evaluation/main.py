@@ -150,8 +150,8 @@ def evaluate(dataset_size,
         with open(evaluator_obj.query_filepaths[query_filename], 'r') as f:
             queries = f.readlines()
 
-        db_data = db_data[:1000]
-        queries = queries[:100]
+        # db_data = db_data[:1000]
+        # queries = queries[:100]
 
     evaluator_obj.db_data = db_data
     evaluator_obj.queries = queries
@@ -206,6 +206,14 @@ def main():
              db_data_filename='fixed_only',
              query_filename='fixed_only',
              k=5,
+             concatenate=False,
+             method='tfidf'),
+
+        dict(dataset_size='small',
+             src_lang=None, tgt_lang=None,
+             db_data_filename='fixed_only',
+             query_filename='fixed_only',
+             k=1,
              concatenate=False,
              method='tfidf'),
 
