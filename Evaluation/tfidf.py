@@ -75,11 +75,11 @@ class TfIdfEvaluator(Evaluator):
         else:
             # Tfidf Vectorizer to fit on db data
 
-            db_corpus, vocab_size = self.gensim_tfidf_preprocess(self.db_data)
+            db_corpus, vocab_dict, vocab_size = self.gensim_tfidf_preprocess(self.db_data)
             tfidf_model = TfidfModel(db_corpus)
             db_data_vectors = tfidf_model[db_corpus]
             print('DB TfIdf scores obtained')
-            query_corpus, _ = self.gensim_tfidf_preprocess(self.queries)
+            query_corpus, _, _ = self.gensim_tfidf_preprocess(self.queries, vocab_dict)
             query_vectors = tfidf_model[query_corpus]
             print('Query TfIdf scores obtained')
             # Get np array format of tfidf scores
@@ -91,7 +91,7 @@ class TfIdfEvaluator(Evaluator):
             # sns.distplot(row)
             # plt.show()
 
-            similarity_matrix = cosine_similarity(db_data_matrix, query_matrix)
+            similarity_matrix = cosine_similarity(db_data_matrix, query_matrix).T
             np.save(filename, similarity_matrix)
 
         # Get top-k results
@@ -101,13 +101,14 @@ class TfIdfEvaluator(Evaluator):
         self.top_k_similarity_matrix = top_k_similarity_matrix
         return top_k_similarity_matrix
 
-    def gensim_tfidf_preprocess(self, data):
+    def gensim_tfidf_preprocess(self, data, corpus_dict=None):
 
         doc_tokenized = [doc.split(' ') for doc in data]
-        corpus_dict = Dictionary(doc_tokenized)
+        if not corpus_dict:
+            corpus_dict = Dictionary(doc_tokenized)
         corpus = [corpus_dict.doc2bow(line) for line in doc_tokenized]
 
-        return corpus, len(corpus_dict.keys())
+        return corpus, corpus_dict, len(corpus_dict.keys())
 
 
 
