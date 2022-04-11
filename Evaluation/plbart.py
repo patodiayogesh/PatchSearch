@@ -114,3 +114,32 @@ class PlBartEvaluator(Evaluator):
         del self.model
 
         return None
+
+    def create_retrieved_fixed_dataset(self,
+                                       top_k_similarity_matrix,
+                                       ):
+
+        """
+        Call Parent class function and pass specific filename
+
+        :param top_k_similarity_matrix: top-k results from get_top_k_similarity_matrix
+        :return: None
+        """
+        retrieved_dataset_filename = 'retrieved' + self.create_filename_with_k() + '_plbart'
+        if 'train' in self.query_filename:
+
+            super().create_retrieved_fixed_dataset(top_k_similarity_matrix,
+                                                   retrieved_dataset_filename,
+                                                   True
+                                                   )
+        else:
+            super().create_retrieved_fixed_dataset(top_k_similarity_matrix,
+                                                   retrieved_dataset_filename,
+                                                   False
+                                                   )
+
+        # Delete model and tokenizer to clear memory
+        del self.tokenizer
+        del self.model
+
+        return None

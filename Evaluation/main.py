@@ -6,6 +6,8 @@ import torch
 from tfidf import TfIdfEvaluator
 from plbart import PlBartEvaluator
 
+from experiments import variations
+
 func_arguments = {}
 
 
@@ -170,137 +172,6 @@ def main():
     Saves all variation results
     :return: None
     """
-    variations = [
-
-        # dict(dataset_size='small',
-        #      src_lang='java', tgt_lang='java',
-        #      db_data_filename='prev_code',
-        #      k=11,
-        #      concatenate=False),
-
-        # dict(dataset_size='small',
-        #      src_lang='java', tgt_lang='java',
-        #      db_data_filename=['buggy_only','commit_msg'],
-        #      k=11,
-        #      concatenate=True),
-
-        # dict(dataset_size='small',
-        #      src_lang='java', tgt_lang='java',
-        #      db_data_filename='prev_code',
-        #      k=2,
-        #      concatenate=False),
-
-        # dict(dataset_size='small',
-        #      src_lang='java', tgt_lang='java',
-        #      db_data_filename=['buggy_only','commit_msg'],
-        #      k=2,
-        #      concatenate=True),
-
-        # dict(dataset_size='small',
-        #      src_lang='java', tgt_lang='java',
-        #      db_data_filename='fixed_only',
-        #      query_filename='fixed_only',
-        #      k=5,
-        #      concatenate=False,
-        #      method='plbart'),
-        #
-        # dict(dataset_size='small',
-        #      src_lang='java', tgt_lang='java',
-        #      db_data_filename='fixed_only',
-        #      query_filename='fixed_only',
-        #      k=1,
-        #      concatenate=False,
-        #      method='plbart'),
-
-        # dict(dataset_size='small',
-        #      src_lang='java', tgt_lang='java',
-        #      db_data_filename='prev_code',
-        #      query_filename='prev_code',
-        #      k=5,
-        #      concatenate=False,
-        #      method='plbart'),
-        #
-        # dict(dataset_size='small',
-        #      src_lang='java', tgt_lang='java',
-        #      db_data_filename='prev_code',
-        #      query_filename='prev_code',
-        #      k=1,
-        #      concatenate=False,
-        #      method='plbart'),
-
-        dict(dataset_size='small',
-             src_lang='java', tgt_lang='java',
-             db_data_filename=['buggy_only','commit_msg'],
-             query_filename=['buggy_only','commit_msg'],
-             k=5,
-             concatenate=True,
-             method='plbart'),
-
-        dict(dataset_size='small',
-             src_lang='java', tgt_lang='java',
-             db_data_filename='buggy_only',
-             query_filename='buggy_only',
-             k=5,
-             concatenate=False,
-             method='plbart'),
-        #
-        # dict(dataset_size='small',
-        #      src_lang='en_XX', tgt_lang='en_XX',
-        #      db_data_filename='commit_msg',
-        #      query_filename='commit_msg',
-        #      k=1,
-        #      concatenate=False,
-        #      method='plbart'),
-        #
-        dict(dataset_size='small',
-             src_lang='java', tgt_lang='java',
-             db_data_filename='commit_msg',
-             query_filename='commit_msg',
-             k=1,
-             concatenate=False,
-             method='plbart'),
-
-        dict(dataset_size='small',
-             src_lang='java', tgt_lang='java',
-             db_data_filename='commit_msg',
-             query_filename='commit_msg',
-             k=5,
-             concatenate=False,
-             method='plbart'),
-
-        # dict(dataset_size='small',
-        #      src_lang=None, tgt_lang=None,
-        #      db_data_filename='fixed_only',
-        #      query_filename='fixed_only',
-        #      k=5,
-        #      concatenate=False,
-        #      method='tfidf'),
-
-        # dict(dataset_size='small',
-        #      src_lang=None, tgt_lang=None,
-        #      db_data_filename='fixed_only',
-        #      query_filename='fixed_only',
-        #      k=1,
-        #      concatenate=False,
-        #      method='tfidf'),
-
-        # dict(dataset_size='small',
-        #      src_lang=None, tgt_lang=None,
-        #      db_data_filename='prev_code',
-        #      query_filename='prev_code',
-        #      k=5,
-        #      concatenate=False,
-        #      method='tfidf'),
-        #
-        # dict(dataset_size='small',
-        #      src_lang=None, tgt_lang=None,
-        #      db_data_filename='prev_code',
-        #      query_filename='prev_code',
-        #      k=1,
-        #      concatenate=False,
-        #      method='tfidf')
-
-    ]
 
     for variation in variations:
         global func_arguments
