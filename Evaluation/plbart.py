@@ -1,4 +1,4 @@
-from utils import Evaluator, concatenate_data
+from utils import Evaluator, concatenate_data, get_file_absolute_location
 from transformers import PLBartTokenizer, PLBartModel
 from os.path import exists
 from sklearn.metrics.pairwise import cosine_similarity
@@ -72,14 +72,18 @@ class PlBartEvaluator(Evaluator):
             similarity_matrix = np.load(filename)
         else:
             # Get PlBart DB and Query Embeddings
-            embeddings_filename = 'embeddings_db_data' + self.create_filename() + '_plbart.npy'
+            embeddings_filename = 'embeddings' + self.create_filename() + '_plbart.npy'
+            embeddings_filename = get_file_absolute_location(self.db_folder_location,
+                                                             embeddings_filename)
             db_data_embeddings = self.create_load_embeddings(
                 concatenate_data(self.db_data) if self.concatenate
                 else self.db_data,
                 embeddings_filename
             )
-            # query_embeddings = db_data_embeddings
-            embeddings_filename = 'embeddings_query' + self.create_filename() + '_plbart.npy'
+
+            embeddings_filename = 'embeddings' + self.create_filename() + '_plbart.npy'
+            embeddings_filename = get_file_absolute_location(self.query_folder_location,
+                                                             embeddings_filename)
             query_embeddings = self.create_load_embeddings(
                 concatenate_data(self.queries) if self.concatenate
                 else self.queries,
@@ -126,17 +130,9 @@ class PlBartEvaluator(Evaluator):
         :return: None
         """
         retrieved_dataset_filename = 'retrieved' + self.create_filename_with_k() + '_plbart'
-        if 'train' in self.query_filename:
-
-            super().create_retrieved_fixed_dataset(top_k_similarity_matrix,
-                                                   retrieved_dataset_filename,
-                                                   True
-                                                   )
-        else:
-            super().create_retrieved_fixed_dataset(top_k_similarity_matrix,
-                                                   retrieved_dataset_filename,
-                                                   False
-                                                   )
+        super().create_retrieved_fixed_dataset(top_k_similarity_matrix,
+                                               retrieved_dataset_filename,
+                                               )
 
         # Delete model and tokenizer to clear memory
         del self.tokenizer

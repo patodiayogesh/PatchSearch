@@ -135,17 +135,9 @@ class TfIdfEvaluator(Evaluator):
         :return: None
         """
         retrieved_dataset_filename = 'retrieved' + self.create_filename_with_k() + '_tfidf'
-        if 'train' in self.query_filename:
-
-            super().create_retrieved_fixed_dataset(top_k_similarity_matrix,
-                                                   retrieved_dataset_filename,
-                                                   True
-                                                   )
-        else:
-            super().create_retrieved_fixed_dataset(top_k_similarity_matrix,
-                                                   retrieved_dataset_filename,
-                                                   False
-                                                   )
+        super().create_retrieved_fixed_dataset(top_k_similarity_matrix,
+                                               retrieved_dataset_filename,
+                                               )
 
         # Delete model and tokenizer to clear memory
         del self.tokenizer

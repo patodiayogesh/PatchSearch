@@ -7,53 +7,34 @@ from tfidf import TfIdfEvaluator
 from plbart import PlBartEvaluator
 
 from experiments import variations
+from utils import set_filepaths, get_file_absolute_location
 
 func_arguments = {}
 
-
-def set_filepaths(obj, basepath, dataset_size):
+def compute_similarity_matrix(obj, method):
     """
-    Function to set filepaths in evaluator object.
+    Function to compute similarity matrix using evaluator obj method.
 
-    :param obj: Evaluator object
-    :param basepath: Path Directory
-    :param dataset_size: small or large dataset
-    :return: None
-
+    :param obj: Evaluator Object
+    :param method: plbart or tfidf
+    :return: torch top k results
     """
-    db_filepaths = dict()
-    db_filepaths['buggy_only'] = path.abspath(
-        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/train/data.buggy_only"))
-    db_filepaths['commit_msg'] = path.abspath(
-        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/train/data.commit_msg"))
-    db_filepaths['fixed_only'] = path.abspath(
-        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/train/data.fixed_only"))
-    db_filepaths['next_code'] = path.abspath(
-        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/train/data.next_code"))
-    db_filepaths['prev_code'] = path.abspath(
-        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/train/data.prev_code"))
-    obj.db_filepaths = db_filepaths
 
-    query_filepaths = dict()
-    query_filepaths['buggy_only'] = path.abspath(
-        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/test/data.buggy_only"))
-    query_filepaths['commit_msg'] = path.abspath(
-        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/test/data.commit_msg"))
-    query_filepaths['fixed_only'] = path.abspath(
-        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/test/data.fixed_only"))
-    query_filepaths['next_code'] = path.abspath(
-        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/test/data.next_code"))
-    query_filepaths['prev_code'] = path.abspath(
-        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/test/data.prev_code"))
-    obj.query_filepaths = query_filepaths
 
-    return
+    similarity_matrix_filename = 'similarity_matrix' + obj.create_filename() + '_' + method + '.npy'
+    similarity_matrix_filename = get_file_absolute_location(obj.query_folder_location,
+                                                            similarity_matrix_filename)
+    start_time = time.time()
+    top_k_similarity_matrix = obj.get_top_k_similarity_matrix(similarity_matrix_filename)
+    print('Obtained top k results', time.time() - start_time)
+
+    return top_k_similarity_matrix
 
 
 def compute_similarity_matrix_and_edit_dist(obj, method):
     """
-    Function to compute similarity matrix using evaluator obj method.
-    Calls objects edit distance method to calculate edit distance
+    Call similarity_matrix method to get top k results.
+    Call objects edit distance method to calculate edit distance
     and plot distribution.
 
     :param obj: Evaluator Object
@@ -61,25 +42,31 @@ def compute_similarity_matrix_and_edit_dist(obj, method):
     :return: None
     """
 
-    if not obj.queries:
-        obj.queries = obj.db_data
+    top_k_results = compute_similarity_matrix(obj, method)
+    obj.calculate_edit_distance(top_k_results)
 
-    similarity_matrix_filename = 'similarity_matrix' + obj.create_filename() + '_' + method + '.npy'
-    start_time = time.time()
-    top_k_similarity_matrix = obj.get_top_k_similarity_matrix(similarity_matrix_filename)
-    print('Obtained top k results', time.time() - start_time)
-    # return map_top_k_results(top_k_similarity_matrix,
-    #                          queries,
-    #                          results_filename,
-    #                          concatenate,
-    #                          )
-    obj.calculate_edit_distance(top_k_similarity_matrix)
+    return None
+
+
+def compute_similarity_matrix_and_map_k_results(obj, method):
+    """
+    Call similarity_matrix method to get top k results.
+    Call objects map k results to create dataset
+
+    :param obj: Evaluator Object
+    :param method: plbart or tfidf
+    :return: None
+    """
+
+    top_k_results = compute_similarity_matrix(obj, method)
+    obj.create_retrieved_fixed_dataset(top_k_results)
 
     return None
 
 
 def evaluate(dataset_size,
              src_lang, tgt_lang,
+             db_path, query_path,
              db_data_filename,
              query_filename,
              k,
@@ -95,6 +82,8 @@ def evaluate(dataset_size,
     :param dataset_size: directory from which to load datasets from
     :param src_lang: plbart source language
     :param tgt_lang: plbart target language
+    :param query_path: query folder name
+    :param db_path: database folder name
     :param db_data_filename: db filename to use for comparison
     :param query_filename: query filename to use for comparison
     :param k: denote the top-k similar data from db for each query
@@ -122,47 +111,14 @@ def evaluate(dataset_size,
         print('Evaluator Method Undefined ', method)
         return None
 
-    set_filepaths(evaluator_obj, path.dirname(__file__), dataset_size)
+    set_filepaths(evaluator_obj, path.dirname(__file__), dataset_size, db_path, query_path)
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
     evaluator_obj.device = device
 
-    # Read Data from DB and Queries
-    if concatenate:
-        db_data = []
-        # print("let us see\n")
-        # print(evaluator_obj.db_filepaths[db_data_filename[0]])
-        with open(evaluator_obj.db_filepaths[db_data_filename[0]], 'r') as f:
-            db_data.append(f.readlines())
-        with open(evaluator_obj.db_filepaths[db_data_filename[1]], 'r') as f:
-            db_data.append(f.readlines())
+    evaluator_obj.set_data()
 
-        queries = []
-        with open(evaluator_obj.query_filepaths[query_filename[0]], 'r') as f:
-            queries.append(f.readlines())
-        with open(evaluator_obj.query_filepaths[query_filename[1]], 'r') as f:
-            queries.append(f.readlines())
-
-        # db_data[0] = db_data[0][:100]
-        # db_data[1] = db_data[1][:100]
-        #
-        # queries[0] = queries[0][:10]
-        # queries[1] = queries[1][:10]
-
-    else:
-        with open(evaluator_obj.db_filepaths[db_data_filename], 'r') as f:
-            db_data = f.readlines()
-
-        with open(evaluator_obj.query_filepaths[query_filename], 'r') as f:
-            queries = f.readlines()
-
-        # db_data = db_data[:100]
-        # queries = queries[:10]
-
-    evaluator_obj.db_data = db_data
-    evaluator_obj.queries = queries
-
-    compute_similarity_matrix_and_edit_dist(evaluator_obj, method)
-
+    # compute_similarity_matrix_and_edit_dist(evaluator_obj, method)
+    compute_similarity_matrix_and_map_k_results(evaluator_obj, method)
     return None
 
 
