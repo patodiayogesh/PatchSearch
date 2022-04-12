@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import nltk
 from os.path import exists
 import seaborn as sns
+import json
 
 
 def concatenate_data(data, token=' <b> '):
@@ -101,6 +102,46 @@ class Evaluator:
         sns.distplot(edit_distances)
         plt.savefig(visualization_filename)
         plt.clf()
+
+        return None
+
+    def create_retrieved_fixed_dataset(self,
+                                       top_k_results,
+                                       retrieved_dataset_filename,
+                                       train_dataset
+                                       ):
+
+        """
+        Retrieve fixed code
+        :param top_k_results: torch top-k result
+        :param retrieved_dataset_filename: Filename
+        :param train_dataset: True or False. If query belongs to training dataset
+        :return: None
+        """
+        db_fixed_only_filepath = self.db_filepaths['fixed_only']
+
+        with open(db_fixed_only_filepath, 'r') as f:
+            db_fixed_only_data = f.readlines()
+
+        top_k_indices = top_k_results.indices.data
+        top_k_scores = top_k_results.values.data
+
+        fixed_code_dataset = []
+        # Retrieve fixed code for each query and top-k db results
+        for i, _ in enumerate(self.queries if not self.concatenate else self.queries[0]):
+
+            indices = top_k_indices[i]
+            scores = top_k_scores[i]
+            query_fixed_codes = []
+            for index, _ in zip(indices, scores):
+                if train_dataset and index == i:
+                    continue
+                query_fixed_codes.append(db_fixed_only_data[index])
+            query_fixed_codes = query_fixed_codes[:self.k]
+            fixed_code_dataset.append('<s>'.join(query_fixed_codes))
+
+        with open(retrieved_dataset_filename, 'w') as f:
+            f.write(json.dumps(fixed_code_dataset))
 
         return None
 
