@@ -8,6 +8,7 @@ from plbart import PlBartEvaluator
 
 from experiments import variations
 from utils import set_filepaths, get_file_absolute_location
+import logging
 
 func_arguments = {}
 
@@ -128,11 +129,13 @@ def main():
     Saves all variation results
     :return: None
     """
-
+    logging.basicConfig(filename='plbart_variations.log', filemode='w', level=logging.INFO)
     for variation in variations:
+        logging.info('Running variation %s', variation)
         global func_arguments
         func_arguments = variation
         evaluate(**func_arguments)
+        logging.info('Completed variation %s', variation)
 
 
 if __name__ == '__main__':

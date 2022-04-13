@@ -139,8 +139,4 @@ class TfIdfEvaluator(Evaluator):
                                                retrieved_dataset_filename,
                                                )
 
-        # Delete model and tokenizer to clear memory
-        del self.tokenizer
-        del self.model
-
         return None

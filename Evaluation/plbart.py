@@ -12,6 +12,28 @@ class PlBartEvaluator(Evaluator):
 
         super().__init__(dataset_size, src_lang, tgt_lang, db_data_filename, query_filename, k, concatenate)
         self.tokenizer, self.model = self.load_model_and_tokenizer()
+        self.tokenizer_max_length = 1024
+
+    def set_data(self):
+        """
+        Call parent function to read from files and set in object
+        Truncate length of each sentence to max tokenizer length
+        :return: None
+        """
+        super().set_data()
+        if self.concatenate:
+            for i, db_data in enumerate(self.db_data):
+                self.db_data[i] = [data[:self.tokenizer_max_length]
+                                   for data in db_data]
+            for i, query_data in enumerate(self.queries):
+                self.queries[i] = [data[:self.tokenizer_max_length]
+                                   for data in query_data]
+
+        else:
+            self.db_data = [data[:self.tokenizer_max_length]
+                            for data in self.db_data]
+            self.queries = [data[:self.tokenizer_max_length]
+                            for data in self.queries]
 
     def load_model_and_tokenizer(self,
                                  tf_save_directory="uclanlp/plbart-base"

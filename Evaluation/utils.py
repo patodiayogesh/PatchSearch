@@ -245,7 +245,7 @@ class Evaluator:
             scores = top_k_scores[i]
             query_fixed_codes = []
             for index, score in zip(indices, scores):
-                print(i,index, score)
+                print(i, index, score)
                 # Ensure that when query is from train dataset
                 # it does not retrieve its own fixed code
                 if train_dataset and index == i:
