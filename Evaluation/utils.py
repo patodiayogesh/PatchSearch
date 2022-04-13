@@ -224,6 +224,9 @@ class Evaluator:
         if type(retrieved_dataset_filename) == str:
             retrieved_dataset_filename = get_file_absolute_location(self.query_folder_location,
                                                                     retrieved_dataset_filename)
+        if exists(retrieved_dataset_filename):
+            print(retrieved_dataset_filename,'exists')
+            return None
 
         # If Query is from train dataset
         if 'train' in self.query_folder_location:
