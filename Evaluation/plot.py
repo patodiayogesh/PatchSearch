@@ -16,9 +16,11 @@ def plot_edit_dist_(files):
     data_pair = zip(y, x)
 
     plt.scatter(*zip(*data_pair))
-    plt.set_xlabel('Prev Code Normalized Edit Distance')
-    plt.set_ylabel('Buggy Code Normalized Edit Distance')
+    plt.xlabel('Prev Code Normalized Edit Distance')
+    plt.ylabel('Buggy Code Normalized Edit Distance')
     plt.title('Buggy Code vs Prev Code')
+    plt.savefig(file_1+'_'+file_2)
+    plt.clf()
 
 for pair in filenames:
     plot_edit_dist_(pair)
