@@ -18,5 +18,3 @@ for k in ks:
                         + size + '_java_java_prev_code_prev_code_' + new_k + '_plbart'
             filenames.append([filename1, filename2])
 
-#return filenames
-

@@ -13,7 +13,9 @@ def plot_edit_dist_(files):
         line = float(f.readline().strip('\n'))
         x.append(line)
 
-    plt.scatter(x, y, c=['r','g'])
+    data_pair = zip(y, x)
+
+    plt.scatter(*zip(*data_pair))
     plt.set_xlabel('Prev Code Normalized Edit Distance')
     plt.set_ylabel('Buggy Code Normalized Edit Distance')
     plt.title('Buggy Code vs Prev Code')
