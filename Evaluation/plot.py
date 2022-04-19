@@ -1,5 +1,6 @@
 from plot_experiments import filenames
 import matplotlib.pyplot as plt
+from os import path
 
 def plot_edit_dist_(files):
 
@@ -19,7 +20,10 @@ def plot_edit_dist_(files):
     plt.xlabel('Prev Code Normalized Edit Distance')
     plt.ylabel('Buggy Code Normalized Edit Distance')
     plt.title('Buggy Code vs Prev Code')
-    plt.savefig(file_1+'_'+file_2)
+    viz_filename = file_1.split('/')[-1] + '_' + file_2.split('/')[-1]
+    viz_filepath = '/'.join(file_1.split('/')[:-1]) + '/' + viz_filename
+    #viz_abspath = path.abspath(vi)
+    plt.savefig(viz_filepath)
     plt.clf()
 
 for pair in filenames:
