@@ -3,7 +3,9 @@ import nltk
 from os import path
 from os.path import exists
 import seaborn as sns
+import numpy as np
 import json
+
 
 
 def concatenate_data(data, token=' <b> '):
@@ -141,6 +143,7 @@ class Evaluator:
     def calculate_edit_distance(self,
                                 top_k_results,
                                 edit_distance_filename,
+                                norm_edit_distance_filename,
                                 visualization_filename,
                                 ):
         """
@@ -149,6 +152,7 @@ class Evaluator:
 
         :param top_k_results: torch top-k result
         :param edit_distance_filename: filename to save edit distance
+        :param norm_edit_distance_filename: filename to save normalized edit distance
         :param visualization_filename: filename to save distribution plot
         :return: None
         """
@@ -160,6 +164,10 @@ class Evaluator:
             edit_distance_filename = get_file_absolute_location(self.query_folder_location,
                                                                 edit_distance_filename
                                                                 )
+        if type(norm_edit_distance_filename) == str:
+            norm_edit_distance_filename = get_file_absolute_location(self.query_folder_location,
+                                                                    norm_edit_distance_filename
+                                                                    )
         if type(visualization_filename) == str:
             visualization_filename = get_file_absolute_location(self.query_folder_location,
                                                                 visualization_filename
@@ -167,42 +175,64 @@ class Evaluator:
 
         if exists(edit_distance_filename):
             print(edit_distance_filename, ' exists')
-            edit_distances = []
-            f = open(edit_distance_filename, 'r')
-            for line in f:
-                edit_distances.append(line.strip('\n'))
-            f.close()
+            # edit_distances = []
+            # f = open(edit_distance_filename, 'r')
+            # for line in f:
+            #     edit_distances.append(line.strip('\n'))
+            # f.close()
+            return None
         else:
+
+            if 'train' in self.query_folder_location:
+                train_dataset = True
+            else:
+                train_dataset = False
+
             with open(db_fixed_only_filepath, 'r') as f:
-                db_fixed_only_data = f.readlines()
+                db_fixed_only_data = [line.rstrip() for line in f]
             with open(query_fixed_only_filepath, 'r') as f:
-                query_fixed_only_data = f.readlines()
+                query_fixed_only_data = [line.rstrip() for line in f]
 
             top_k_indices = top_k_results.indices.data
             top_k_scores = top_k_results.values.data
 
             edit_distances = []
+            norm_edit_distances = []
             # Compute Normalized Levenshtein distance for each query and top-k db results
             for i, _ in enumerate(self.queries if not self.concatenate else self.queries[0]):
 
                 indices = top_k_indices[i]
                 scores = top_k_scores[i]
                 temp_edit_distances = []
+                temp_norm_edit_distances = []
                 for index, _ in zip(indices, scores):
                     # if index != i:
-                    print(index, i)
+                    print(i, index)
+                    if train_dataset and index == i:
+                        continue
                     levenshtein_dist = nltk.edit_distance(query_fixed_only_data[i], db_fixed_only_data[index])
                     normalized_levenshtein_dist = levenshtein_dist / (
                         max(len(query_fixed_only_data[i]), len(db_fixed_only_data[index])))
-                    temp_edit_distances.append(normalized_levenshtein_dist)
-                edit_distances.append(min(temp_edit_distances))
+                    temp_edit_distances.append(levenshtein_dist)
+                    temp_norm_edit_distances.append(normalized_levenshtein_dist)
+
+                if train_dataset:
+                    temp_edit_distances = temp_edit_distances[:self.k-1]
+                    temp_norm_edit_distances = temp_norm_edit_distances[:self.k-1]
+
+                edit_distances.append(np.mean(temp_edit_distances))
+                norm_edit_distances.append(min(temp_norm_edit_distances))
 
             with open(edit_distance_filename, 'w') as f:
                 for elem in edit_distances:
                     f.write(str(elem) + "\n")
 
+            with open(norm_edit_distance_filename, 'w') as f:
+                for elem in norm_edit_distances:
+                    f.write(str(elem) + "\n")
+
         # Plot and save graph
-        sns.distplot(edit_distances)
+        sns.distplot(norm_edit_distances)
         plt.savefig(visualization_filename)
         plt.clf()
 

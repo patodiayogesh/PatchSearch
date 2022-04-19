@@ -118,8 +118,8 @@ def evaluate(dataset_size,
 
     evaluator_obj.set_data()
 
-    # compute_similarity_matrix_and_edit_dist(evaluator_obj, method)
-    compute_similarity_matrix_and_map_k_results(evaluator_obj, method)
+    compute_similarity_matrix_and_edit_dist(evaluator_obj, method)
+    #compute_similarity_matrix_and_map_k_results(evaluator_obj, method)
     return None
 
 

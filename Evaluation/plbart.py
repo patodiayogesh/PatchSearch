@@ -130,9 +130,11 @@ class PlBartEvaluator(Evaluator):
         :return: None
         """
         edit_distance_filename = 'edit_distances' + self.create_filename_with_k() + '_plbart'
+        norm_edit_distance_filename = 'norm_edit_distances' + self.create_filename_with_k() + '_plbart'
         visualization_filename = 'visualization' + self.create_filename_with_k() + '_plbart'
         super().calculate_edit_distance(top_k_similarity_matrix,
                                         edit_distance_filename,
+                                        norm_edit_distance_filename,
                                         visualization_filename)
 
         # Delete model and tokenizer to clear memory

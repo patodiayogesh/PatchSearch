@@ -292,12 +292,12 @@ variations = [
 
 ]
 
-ks = [1, 2, 5]
+ks = [1]#, 2, 5]
 db_path = 'train'
 dataset_sizes = ['small', 'medium']
 query_paths = ['train', 'eval', 'test']
-filenames = ['prev_code', 'buggy_only', 'commit_msg']
-methods = ['plbart', 'tfidf']
+filenames = ['prev_code', 'buggy_only']#, 'commit_msg']
+methods = ['plbart']#, 'tfidf']
 variations = []
 for dataset_size in dataset_sizes:
     for query_path in query_paths:
