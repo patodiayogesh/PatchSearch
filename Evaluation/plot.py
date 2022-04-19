@@ -7,14 +7,22 @@ def plot_edit_dist_(files):
     file_1 = files[0]
     file_2 = files[1]
     x, y = [], []
-    with open(file_1) as f:
-        line = float(f.readline().strip('\n'))
-        y.append(line)
-    with open(file_1) as f:
-        line = float(f.readline().strip('\n'))
-        x.append(line)
+    # with open(file_1) as f:
+    #     line = float(f.readline().strip('\n'))
+    #     y.append(line)
+    # with open(file_1) as f:
+    #     line = float(f.readline().strip('\n'))
+    #     x.append(line)
+    f = open(file_1, 'r')
+    for line in f:
+        y.append(float(line.strip('\n')))
+    f.close()
+    f = open(file_2, 'r')
+    for line in f:
+        x.append(float(line.strip('\n')))
+    f.close()
 
-    data_pair = zip(y, x)
+    data_pair = zip(x, y)
 
     plt.scatter(*zip(*data_pair))
     plt.xlabel('Prev Code Normalized Edit Distance')
