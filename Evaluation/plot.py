@@ -24,7 +24,7 @@ def plot_edit_dist_(files):
 
     data_pair = zip(x, y)
 
-    plt.scatter(*zip(*data_pair))
+    plt.scatter(*zip(*data_pair), s=1)
     plt.xlabel('Prev Code Normalized Edit Distance')
     plt.ylabel('Buggy Code Normalized Edit Distance')
     plt.title('Buggy Code vs Prev Code')
