@@ -5,7 +5,7 @@
 # ]
 filenames = []
 ks = [1]#, 2, 3]
-dataset_size = ['small']#, 'medium']
+dataset_size = ['small','medium']#, 'medium']
 query = ['train', 'eval', 'test']
 
 for k in ks:
