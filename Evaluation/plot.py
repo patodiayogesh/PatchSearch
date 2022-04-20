@@ -24,10 +24,30 @@ def plot_edit_dist_(files):
 
     data_pair = zip(x, y)
 
+    if 'prev' in file_1:
+        y_label = 'Fixed Code Normalized Edit Distance Retrieved using Prev Code'
+        y_title = 'Prev Code'
+    elif 'commit' in file_1:
+        y_label = 'Fixed Code Normalized Edit Distance Retrieved using Commit Msg'
+        y_title = 'Commit Message'
+    else:
+        y_label = 'Fixed Code Normalized Edit Distance Retrieved using Buggy Only'
+        y_title = 'Buggy Only'
+
+    if 'prev' in file_2:
+        x_label = 'Fixed Code Normalized Edit Distance Retrieved using Prev Code'
+        x_title = 'Prev Code'
+    elif 'commit' in file_2:
+        x_label = 'Fixed Code Normalized Edit Distance Retrieved using Commit Msg'
+        x_title = 'Commit Message'
+    else:
+        x_label = 'Fixed Code Normalized Edit Distance Retrieved using Buggy Only'
+        x_title = 'Buggy Only'
+
     plt.scatter(*zip(*data_pair), s=1)
-    plt.xlabel('Prev Code Normalized Edit Distance')
-    plt.ylabel('Buggy Code Normalized Edit Distance')
-    plt.title('Buggy Code vs Prev Code')
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.title(y_title + ' vs ' + x_title)
     viz_filename = file_1.split('/')[-1] + '_' + file_2.split('/')[-1]
     viz_filepath = '/'.join(file_1.split('/')[:-1]) + '/' + viz_filename
     #viz_abspath = path.abspath(vi)
