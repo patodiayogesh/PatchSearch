@@ -221,7 +221,7 @@ class Evaluator:
                     temp_norm_edit_distances = temp_norm_edit_distances[:self.k-1]
 
                 edit_distances.append(np.mean(temp_edit_distances))
-                norm_edit_distances.append(min(temp_norm_edit_distances))
+                norm_edit_distances.append(np.mean(temp_norm_edit_distances))
 
             with open(edit_distance_filename, 'w') as f:
                 for elem in edit_distances:
