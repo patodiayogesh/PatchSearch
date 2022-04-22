@@ -22,6 +22,8 @@ def plot_edit_dist_(files):
         x.append(float(line.strip('\n')))
     f.close()
 
+
+
     data_pair = zip(x, y)
 
     if 'prev' in file_1:
@@ -45,6 +47,7 @@ def plot_edit_dist_(files):
         x_title = 'Buggy Only'
 
     plt.scatter(*zip(*data_pair), s=1)
+    plt.subplots_adjust(bottom=0.6)
     plt.xlabel(x_label)
     plt.ylabel(y_label)
     plt.title(y_title + ' vs ' + x_title)
