@@ -4,6 +4,8 @@ from os import path
 
 def plot_edit_dist_(files):
 
+    min_val = -1
+    max_val = 0.6
     file_1 = files[0]
     file_2 = files[1]
     x, y = [], []
@@ -26,6 +28,15 @@ def plot_edit_dist_(files):
 
     data_pair = zip(x, y)
 
+    cut_data_pair = []
+
+    for a,b in data_pair:
+
+        if a < min_val or a > max_val or b < min_val or b > max_val:
+            continue
+        cut_data_pair.append((a,b))
+
+    data_pair = cut_data_pair
     if 'prev' in file_1:
         y_label = 'Fixed Code Normalized Edit Distance Retrieved using Prev Code'
         y_title = 'Prev Code'
@@ -47,7 +58,7 @@ def plot_edit_dist_(files):
         x_title = 'Buggy Only'
 
     plt.scatter(*zip(*data_pair), s=1)
-    plt.subplots_adjust(bottom=0.6)
+    #plt.subplots_adjust(bottom=0.6)
     plt.xlabel(x_label)
     plt.ylabel(y_label)
     plt.title(y_title + ' vs ' + x_title)
