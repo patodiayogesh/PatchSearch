@@ -6,10 +6,7 @@ def read_file(filename):
         return [line.rstrip() for line in f]
 
 
-def concatenate():
-    size = 'small'
-    dataset = 'eval'
-
+def concatenate(size, dataset):
     min_val = 0.7
     max_val = 0.95
 
@@ -59,9 +56,7 @@ def concatenate():
 
     df['buggy_norm_edit_dist'] = pd.to_numeric(df['buggy_norm_edit_dist'])
     df['prev_norm_edit_dist'] = pd.to_numeric(df['prev_norm_edit_dist'])
-    # df['commit_norm_edit_dist'] = pd.to_numeric(df['commit_norm_edit_dist'])
-
-    df_query = ''
+    # df['commit_norm_edit_dist'] = pd.to_numeric(df['commit_norm_edit_dist'])s
 
     df = df[(min_val <= df['buggy_norm_edit_dist'])
             & (df['buggy_norm_edit_dist'] <= max_val)
@@ -69,6 +64,9 @@ def concatenate():
             & (df['prev_norm_edit_dist'] <= max_val)
             ]
 
-    df.to_csv(file_location+'query_retrieved_score.csv')
+    df.to_csv(file_location + 'query_retrieved_score.csv')
 
-concatenate()
+
+concatenate(size='small', dataset='eval')
+concatenate(size='small', dataset='test')
+concatenate(size='small', dataset='train')
