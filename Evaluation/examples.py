@@ -61,8 +61,12 @@ def concatenate():
     df['prev_norm_edit_dist'] = pd.to_numeric(df['prev_norm_edit_dist'])
     # df['commit_norm_edit_dist'] = pd.to_numeric(df['commit_norm_edit_dist'])
 
-    df = df[(min_val <= df['buggy_norm_edit_dist'] <= max_val) &
-            (min_val <= df['prev_norm_edit_dist'] <= max_val)
+    df_query = ''
+
+    df = df[(min_val <= df['buggy_norm_edit_dist'])
+            & (df['buggy_norm_edit_dist'] <= max_val)
+            & (min_val <= df['prev_norm_edit_dist'])
+            & (df['prev_norm_edit_dist'] <= max_val)
             ]
 
     df.to_csv(file_location+'query_retrieved_score.csv')
