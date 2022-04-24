@@ -59,7 +59,7 @@ def concatenate():
 
     df['buggy_norm_edit_dist'] = pd.to_numeric(df['buggy_norm_edit_dist'])
     df['prev_norm_edit_dist'] = pd.to_numeric(df['prev_norm_edit_dist'])
-    df['commit_norm_edit_dist'] = pd.to_numeric(df['commit_norm_edit_dist'])
+    # df['commit_norm_edit_dist'] = pd.to_numeric(df['commit_norm_edit_dist'])
 
     df = df[(min_val <= df['buggy_norm_edit_dist'] <= max_val) &
             (min_val <= df['prev_norm_edit_dist'] <= max_val)
