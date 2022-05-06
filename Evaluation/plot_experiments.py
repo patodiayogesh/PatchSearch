@@ -5,7 +5,7 @@
 # ]
 filenames = []
 ks = [1]#, 2, 3]
-dataset_size = ['small','medium']#, 'medium']
+dataset_size = ['small',]#'medium']#, 'medium']
 query = ['train', 'eval', 'test']
 
 for k in ks:
@@ -17,7 +17,7 @@ for k in ks:
                         + size + '_java_java_commit_msg_commit_msg_' + new_k + '_plbart'
             filename2 = '../Patch-Dataset/' + size + '/' + q + '/norm_edit_distances_' \
                         + size + '_java_java_prev_code_prev_code_' + new_k + '_plbart'
-            filenames.append([filename1, filename2])
+            filenames.append([filename2, filename1])
 
             filename1 = '../Patch-Dataset/' + size + '/' + q + '/norm_edit_distances_' \
                         + size + '_java_java_buggy_only_buggy_only_' + new_k + '_plbart'

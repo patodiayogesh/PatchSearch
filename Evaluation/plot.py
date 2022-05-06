@@ -5,7 +5,7 @@ from os import path
 def plot_edit_dist_(files):
 
     min_val = -1
-    max_val = 0.6
+    max_val = 1.1
     file_1 = files[0]
     file_2 = files[1]
     x, y = [], []
