@@ -7,8 +7,8 @@ def read_file(filename):
 
 
 def concatenate(size, dataset):
-    min_val = 0.7
-    max_val = 0.95
+    min_val = -1
+    max_val = 0.2
 
     file_location = '../Patch-Dataset/' + size + '/' + dataset + '/'
 

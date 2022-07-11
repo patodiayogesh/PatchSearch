@@ -22,11 +22,12 @@ class PlBartEvaluator(Evaluator):
         """
         super().set_data()
         if self.concatenate:
+            n_data = len(self.db_data)
             for i, db_data in enumerate(self.db_data):
-                self.db_data[i] = [data[:self.tokenizer_max_length]
+                self.db_data[i] = [data[:(self.tokenizer_max_length//n_data-1)]
                                    for data in db_data]
             for i, query_data in enumerate(self.queries):
-                self.queries[i] = [data[:self.tokenizer_max_length]
+                self.queries[i] = [data[:(self.tokenizer_max_length//n_data-1)]
                                    for data in query_data]
 
         else:
