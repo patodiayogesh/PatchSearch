@@ -107,15 +107,13 @@ class Evaluator:
         db_data, queries = [], []
         if self.concatenate:
             # print(evaluator_obj.db_filepaths[db_data_filename[0]])
-            with open(self.db_filepaths[self.db_data_filename[0]], 'r') as f:
-                db_data.append([line.rstrip() for line in f])
-            with open(self.db_filepaths[self.db_data_filename[1]], 'r') as f:
-                db_data.append([line.rstrip() for line in f])
+            for file in self.db_data_filename:
+                with open(self.db_filepaths[file], 'r') as f:
+                    db_data.append([line.rstrip() for line in f])
 
-            with open(self.query_filepaths[self.query_filename[0]], 'r') as f:
-                queries.append([line.rstrip() for line in f])
-            with open(self.query_filepaths[self.query_filename[1]], 'r') as f:
-                queries.append([line.rstrip() for line in f])
+            for file in self.query_filename:
+                with open(self.query_filepaths[file], 'r') as f:
+                    queries.append([line.rstrip() for line in f])
 
             # db_data[0] = db_data[0][:100]
             # db_data[1] = db_data[1][:100]
