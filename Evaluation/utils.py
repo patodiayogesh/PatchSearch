@@ -17,7 +17,11 @@ def concatenate_data(data, token=' <b> '):
     :return: list of strings
     """
 
-    return [x + token + y for x, y in zip(data[0], data[1])]
+    if len(data) == 2:
+        return [x + token + y for x, y in zip(data[0], data[1])]
+    elif len(data) == 3:
+        return [x + token + y + token + z for x, y, z in zip(data[0], data[1], data[2])]
+
 
 def set_filepaths(obj, basepath, dataset_size, db_path, query_path):
     """
@@ -117,9 +121,11 @@ class Evaluator:
 
             # db_data[0] = db_data[0][:100]
             # db_data[1] = db_data[1][:100]
+            # db_data[1] = db_data[2][:100]
             #
             # queries[0] = queries[0][:10]
             # queries[1] = queries[1][:10]
+            # queries[2] = queries[2][:10]
 
         else:
             with open(self.db_filepaths[self.db_data_filename], 'r') as f:
