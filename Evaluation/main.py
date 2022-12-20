@@ -119,8 +119,8 @@ def evaluate(dataset_size,
         return None
 
     set_filepaths(evaluator_obj, path.dirname(__file__), dataset_size, db_path, query_path)
-    device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    evaluator_obj.device = device
+    # device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    # evaluator_obj.device = device
 
     evaluator_obj.set_data()
 

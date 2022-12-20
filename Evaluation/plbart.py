@@ -11,6 +11,7 @@ class PlBartEvaluator(Evaluator):
     def __init__(self, dataset_size, src_lang, tgt_lang, db_data_filename, query_filename, k, concatenate):
 
         super().__init__(dataset_size, src_lang, tgt_lang, db_data_filename, query_filename, k, concatenate)
+        self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         self.tokenizer, self.model = self.load_model_and_tokenizer()
         self.tokenizer_max_length = 1024
 

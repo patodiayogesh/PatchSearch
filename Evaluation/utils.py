@@ -134,8 +134,8 @@ class Evaluator:
             with open(self.query_filepaths[self.query_filename], 'r') as f:
                 queries = [line.rstrip() for line in f]
 
-            # db_data = db_data[:100]
-            # queries = queries[:10]
+            db_data = db_data[:100]
+            queries = queries[:10]
 
         self.db_data = db_data
         self.queries = queries
