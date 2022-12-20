@@ -1,0 +1,2 @@
+INFO:root:Running variation {'dataset_size': 'small', 'src_lang': 'java', 'tgt_lang': 'java', 'db_path': 'train', 'query_path': 'train', 'db_data_filename': 'prev_code', 'query_filename': 'prev_code', 'k': 6, 'concatenate': False, 'method': 'plbart'}
+INFO:root:Completed variation {'dataset_size': 'small', 'src_lang': 'java', 'tgt_lang': 'java', 'db_path': 'train', 'query_path': 'train', 'db_data_filename': 'prev_code', 'query_filename': 'prev_code', 'k': 6, 'concatenate': False, 'method': 'plbart'}

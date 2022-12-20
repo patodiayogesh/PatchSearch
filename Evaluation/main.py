@@ -64,6 +64,12 @@ def compute_similarity_matrix_and_map_k_results(obj, method):
 
     return None
 
+def compute_similarity_matrix_and_edit_dist_and_map_k_results(obj, method):
+
+    top_k_results = compute_similarity_matrix(obj, method)
+    obj.calculate_edit_distance(top_k_results)
+    obj.create_retrieved_fixed_dataset(top_k_results)
+
 
 def evaluate(dataset_size,
              src_lang, tgt_lang,
@@ -118,8 +124,8 @@ def evaluate(dataset_size,
 
     evaluator_obj.set_data()
 
-    #compute_similarity_matrix_and_edit_dist(evaluator_obj, method)
-    compute_similarity_matrix_and_map_k_results(evaluator_obj, method)
+    compute_similarity_matrix_and_edit_dist_and_map_k_results(evaluator_obj, method)
+    #compute_similarity_matrix_and_map_k_results(evaluator_obj, method)
     return None
 
 

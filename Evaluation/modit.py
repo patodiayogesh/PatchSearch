@@ -6,12 +6,13 @@ import torch
 import numpy as np
 
 
-class PlBartEvaluator(Evaluator):
+class ModitEvaluator(Evaluator):
 
     def __init__(self, dataset_size, src_lang, tgt_lang, db_data_filename, query_filename, k, concatenate):
 
         super().__init__(dataset_size, src_lang, tgt_lang, db_data_filename, query_filename, k, concatenate)
-        self.tokenizer, self.model = self.load_model_and_tokenizer()
+        # TODO: Change load_model_and_tokenizer() func
+        # self.tokenizer, self.model = self.load_model_and_tokenizer()
         self.tokenizer_max_length = 1024
 
     def set_data(self):
@@ -39,14 +40,9 @@ class PlBartEvaluator(Evaluator):
     def load_model_and_tokenizer(self,
                                  tf_save_directory="uclanlp/plbart-base"
                                  ):
-        tokenizer = PLBartTokenizer.from_pretrained(tf_save_directory,
-                                                    src_lang=self.src_lang,
-                                                    tgt_lang=self.tgt_lang,
-                                                    )
-        model = PLBartModel.from_pretrained('uclanlp/plbart-base')  # .to(self.device)
-        model.eval()
 
-        return tokenizer, model
+        fairseq-
+        # return tokenizer, model
 
     def create_load_embeddings(self,
                                train_set,
@@ -66,12 +62,13 @@ class PlBartEvaluator(Evaluator):
 
         embeddings = []
         for j in range(len(train_set)):
-            print(j)
-            code_encodings = self.tokenizer(train_set[j],
-                                            return_tensors="pt")  # .to(device)
+            # TODO: Change
+            # code_encodings = self.tokenizer(train_set[j],
+            #                                 return_tensors="pt")  # .to(device)
             with torch.no_grad():
-                code_embeddings = self.model(**code_encodings)
-            code_embeddings = torch.mean(code_embeddings.encoder_last_hidden_state, dim=1)
+                # code_embeddings = self.model(**code_encodings)
+                pass
+            code_embeddings = torch.mean(code_embeddings.last_hidden_state, dim=1)
             code_embeddings = code_embeddings.flatten()
 
             embeddings.append(code_embeddings.detach().cpu().numpy())
@@ -95,7 +92,7 @@ class PlBartEvaluator(Evaluator):
             similarity_matrix = np.load(filename)
         else:
             # Get PlBart DB and Query Embeddings
-            embeddings_filename = 'embeddings' + self.create_filename() + '_plbart.npy'
+            embeddings_filename = 'embeddings' + self.create_filename() + '_modit.npy'
             embeddings_filename = get_file_absolute_location(self.db_folder_location,
                                                              embeddings_filename)
             db_data_embeddings = self.create_load_embeddings(
@@ -104,7 +101,7 @@ class PlBartEvaluator(Evaluator):
                 embeddings_filename
             )
 
-            embeddings_filename = 'embeddings' + self.create_filename() + '_plbart.npy'
+            embeddings_filename = 'embeddings' + self.create_filename() + '_modit.npy'
             embeddings_filename = get_file_absolute_location(self.query_folder_location,
                                                              embeddings_filename)
             query_embeddings = self.create_load_embeddings(
@@ -130,9 +127,9 @@ class PlBartEvaluator(Evaluator):
         :param top_k_similarity_matrix: top-k results from get_top_k_similarity_matrix
         :return: None
         """
-        edit_distance_filename = 'edit_distances' + self.create_filename_with_k() + '_plbart'
-        norm_edit_distance_filename = 'norm_edit_distances' + self.create_filename_with_k() + '_plbart'
-        visualization_filename = 'visualization' + self.create_filename_with_k() + '_plbart'
+        edit_distance_filename = 'edit_distances' + self.create_filename_with_k() + '_modit'
+        norm_edit_distance_filename = 'norm_edit_distances' + self.create_filename_with_k() + '_modit'
+        visualization_filename = 'visualization' + self.create_filename_with_k() + '_modit'
         super().calculate_edit_distance(top_k_similarity_matrix,
                                         edit_distance_filename,
                                         norm_edit_distance_filename,
@@ -154,7 +151,7 @@ class PlBartEvaluator(Evaluator):
         :param top_k_similarity_matrix: top-k results from get_top_k_similarity_matrix
         :return: None
         """
-        retrieved_dataset_filename = 'retrieved' + self.create_filename_with_k() + '_plbart'
+        retrieved_dataset_filename = 'retrieved' + self.create_filename_with_k() + '_modit'
         super().create_retrieved_fixed_dataset(top_k_similarity_matrix,
                                                retrieved_dataset_filename,
                                                )
