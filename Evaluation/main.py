@@ -125,6 +125,8 @@ def evaluate(dataset_size,
     evaluator_obj.set_data()
 
     compute_similarity_matrix_and_edit_dist_and_map_k_results(evaluator_obj, method)
+    del evaluator_obj.tokenizer
+    del evaluator_obj.model
     #compute_similarity_matrix_and_map_k_results(evaluator_obj, method)
     return None
 

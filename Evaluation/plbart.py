@@ -139,8 +139,8 @@ class PlBartEvaluator(Evaluator):
                                         visualization_filename)
 
         # Delete model and tokenizer to clear memory
-        del self.tokenizer
-        del self.model
+        # del self.tokenizer
+        # del self.model
 
         return None
 
@@ -160,7 +160,7 @@ class PlBartEvaluator(Evaluator):
                                                )
 
         # Delete model and tokenizer to clear memory
-        del self.tokenizer
-        del self.model
+        # del self.tokenizer
+        # del self.model
 
         return None
