@@ -39,3 +39,7 @@ Patch-Dataset/small/test/retrieved_small_java_java_buggy_only_buggy_only_1_plbar
 Patch-Dataset/small/train/retrieved_small_java_java_buggy_only_buggy_only_2_plbart
 Patch-Dataset/small/test/retrieved_small_java_java_buggy_only_buggy_only_5_plbart
 Patch-Dataset/small/train/retrieved_small_java_java_buggy_only_buggy_only_6_plbart
+Patch-Dataset/*
+Old-Patch-Dataset/
+*.log
+*__pycache__*
