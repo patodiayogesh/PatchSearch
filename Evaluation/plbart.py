@@ -43,7 +43,7 @@ class PlBartEvaluator(Evaluator):
                                                     src_lang=self.src_lang,
                                                     tgt_lang=self.tgt_lang,
                                                     )
-        model = PLBartModel.from_pretrained('uclanlp/plbart-base')  # .to(self.device)
+        model = PLBartModel.from_pretrained('uclanlp/plbart-base').to(self.device)
         model.eval()
 
         return tokenizer, model
@@ -66,9 +66,8 @@ class PlBartEvaluator(Evaluator):
 
         embeddings = []
         for j in range(len(train_set)):
-            print(j)
             code_encodings = self.tokenizer(train_set[j],
-                                            return_tensors="pt")  # .to(device)
+                                            return_tensors="pt").to(self.device)
             with torch.no_grad():
                 code_embeddings = self.model(**code_encodings)
             code_embeddings = torch.mean(code_embeddings.encoder_last_hidden_state, dim=1)
