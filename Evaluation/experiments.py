@@ -296,7 +296,10 @@ ks = [5] #1
 db_path = 'train'
 dataset_sizes = ['small']#, 'medium']
 query_paths = ['train', 'eval', 'test']
-filenames = ['prev_code', 'buggy_only', 'commit_msg']
+filenames = [['prev_code', 'buggy_only'],
+             ['prev_code','commit_msg'],
+             ['buggy_only','commit_msg']
+             ]
 methods = ['plbart']
 variations = []
 for dataset_size in dataset_sizes:
@@ -312,7 +315,7 @@ for dataset_size in dataset_sizes:
                         'db_data_filename': filename,
                         'query_filename': filename,
                         'k': k + 1 if 'train' == query_path else k,
-                        'concatenate': False,
+                        'concatenate': True,
                         'method': method,
                     }
                     variations.append(variation)
