@@ -21,7 +21,6 @@ def compute_similarity_matrix(obj, method):
     :return: torch top k results
     """
 
-
     similarity_matrix_filename = 'similarity_matrix' + obj.create_filename() + '_' + method + '.npy'
     similarity_matrix_filename = get_file_absolute_location(obj.query_folder_location,
                                                             similarity_matrix_filename)
@@ -127,7 +126,7 @@ def evaluate(dataset_size,
     compute_similarity_matrix_and_edit_dist_and_map_k_results(evaluator_obj, method)
     del evaluator_obj.tokenizer
     del evaluator_obj.model
-    #compute_similarity_matrix_and_map_k_results(evaluator_obj, method)
+    # compute_similarity_matrix_and_map_k_results(evaluator_obj, method)
     return None
 
 

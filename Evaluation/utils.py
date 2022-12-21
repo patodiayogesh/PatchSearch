@@ -134,8 +134,8 @@ class Evaluator:
             with open(self.query_filepaths[self.query_filename], 'r') as f:
                 queries = [line.rstrip() for line in f]
 
-            db_data = db_data[:100]
-            queries = queries[:10]
+            # db_data = db_data[:100]
+            # queries = queries[:10]
 
         self.db_data = db_data
         self.queries = queries
@@ -211,7 +211,7 @@ class Evaluator:
                 temp_norm_edit_distances = []
                 for index, _ in zip(indices, scores):
                     # if index != i:
-                    print(i, index)
+                    # print(i, index)
                     if train_dataset and index == i:
                         continue
                     levenshtein_dist = nltk.edit_distance(query_fixed_only_data[i], db_fixed_only_data[index])
@@ -282,7 +282,7 @@ class Evaluator:
             scores = top_k_scores[i]
             query_fixed_codes = []
             for index, score in zip(indices, scores):
-                print(i, index, score)
+                # print(i, index, score)
                 # Ensure that when query is from train dataset
                 # it does not retrieve its own fixed code
                 if train_dataset and index == i:
