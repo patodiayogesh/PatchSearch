@@ -1,4 +1,5 @@
 from utils import Evaluator, concatenate_data, get_file_absolute_location
+from modit import load_modit_model
 from transformers import PLBartTokenizer, PLBartModel
 from os.path import exists
 from sklearn.metrics.pairwise import cosine_similarity
@@ -8,11 +9,16 @@ import numpy as np
 
 class PlBartEvaluator(Evaluator):
 
-    def __init__(self, dataset_size, src_lang, tgt_lang, db_data_filename, query_filename, k, concatenate):
+    def __init__(self, dataset_size, src_lang, tgt_lang, db_data_filename, query_filename, k, concatenate,
+                 model_ckpt=None):
 
         super().__init__(dataset_size, src_lang, tgt_lang, db_data_filename, query_filename, k, concatenate)
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        self.tokenizer, self.model = self.load_model_and_tokenizer()
+        if model_ckpt is None:
+            self.model_name = 'plbart'
+        elif 'modit' in model_ckpt:
+            self.model_name = 'modit'
+        self.tokenizer, self.model = self.load_model_and_tokenizer(model_ckpt=model_ckpt)
         self.tokenizer_max_length = 1024
 
     def set_data(self):
@@ -38,13 +44,21 @@ class PlBartEvaluator(Evaluator):
                             for data in self.queries]
 
     def load_model_and_tokenizer(self,
-                                 tf_save_directory="uclanlp/plbart-base"
+                                 tf_save_directory="uclanlp/plbart-base",
+                                 model_ckpt=None
                                  ):
         tokenizer = PLBartTokenizer.from_pretrained(tf_save_directory,
                                                     src_lang=self.src_lang,
                                                     tgt_lang=self.tgt_lang,
                                                     )
-        model = PLBartModel.from_pretrained('uclanlp/plbart-base').to(self.device)
+        if model_ckpt is None:
+            model = PLBartModel.from_pretrained('uclanlp/plbart-base').to(self.device)
+        else:
+            if self.model_name == 'modit':
+                model = load_modit_model(model_ckpt)
+                model = model.to(self.device)
+            else:
+                model = PLBartModel.from_pretrained(model_ckpt).to(self.device)
         model.eval()
 
         return tokenizer, model
@@ -95,7 +109,7 @@ class PlBartEvaluator(Evaluator):
             similarity_matrix = np.load(filename)
         else:
             # Get PlBart DB and Query Embeddings
-            embeddings_filename = 'embeddings' + self.create_filename() + '_plbart.npy'
+            embeddings_filename = 'embeddings' + self.create_filename() + f'_{self.model_name}.npy'
             embeddings_filename = get_file_absolute_location(self.db_folder_location,
                                                              embeddings_filename)
             db_data_embeddings = self.create_load_embeddings(
@@ -104,7 +118,7 @@ class PlBartEvaluator(Evaluator):
                 embeddings_filename
             )
 
-            embeddings_filename = 'embeddings' + self.create_filename() + '_plbart.npy'
+            embeddings_filename = 'embeddings' + self.create_filename() + f'_{self.model_name}.npy'
             embeddings_filename = get_file_absolute_location(self.query_folder_location,
                                                              embeddings_filename)
             query_embeddings = self.create_load_embeddings(
@@ -130,9 +144,9 @@ class PlBartEvaluator(Evaluator):
         :param top_k_similarity_matrix: top-k results from get_top_k_similarity_matrix
         :return: None
         """
-        edit_distance_filename = 'edit_distances' + self.create_filename_with_k() + '_plbart'
-        norm_edit_distance_filename = 'norm_edit_distances' + self.create_filename_with_k() + '_plbart'
-        visualization_filename = 'visualization' + self.create_filename_with_k() + '_plbart'
+        edit_distance_filename = 'edit_distances' + self.create_filename_with_k() + f'_{self.model_name}'
+        norm_edit_distance_filename = 'norm_edit_distances' + self.create_filename_with_k() + f'_{self.model_name}'
+        visualization_filename = 'visualization' + self.create_filename_with_k() + f'_{self.model_name}'
         super().calculate_edit_distance(top_k_similarity_matrix,
                                         edit_distance_filename,
                                         norm_edit_distance_filename,
@@ -154,7 +168,7 @@ class PlBartEvaluator(Evaluator):
         :param top_k_similarity_matrix: top-k results from get_top_k_similarity_matrix
         :return: None
         """
-        retrieved_dataset_filename = 'retrieved' + self.create_filename_with_k() + '_plbart'
+        retrieved_dataset_filename = 'retrieved' + self.create_filename_with_k() + f'_{self.model_name}'
         super().create_retrieved_fixed_dataset(top_k_similarity_matrix,
                                                retrieved_dataset_filename,
                                                )

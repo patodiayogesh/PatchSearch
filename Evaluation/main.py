@@ -77,7 +77,8 @@ def evaluate(dataset_size,
              query_filename,
              k,
              concatenate,
-             method
+             method,
+             model_ckpt,
              ):
     """
     Create Evaluator Object
@@ -113,6 +114,14 @@ def evaluate(dataset_size,
                                        query_filename,
                                        k,
                                        concatenate)
+    elif method == 'modit':
+        evaluator_obj = PlBartEvaluator(dataset_size,
+                                        src_lang, tgt_lang,
+                                        db_data_filename,
+                                        query_filename,
+                                        k,
+                                        concatenate,
+                                        model_ckpt=model_ckpt)
     else:
         print('Evaluator Method Undefined ', method)
         return None
@@ -136,7 +145,7 @@ def main():
     Saves all variation results
     :return: None
     """
-    logging.basicConfig(filename='plbart_variations.log', filemode='w', level=logging.INFO)
+    logging.basicConfig(filename='modit_variations.log', filemode='w', level=logging.INFO)
     for variation in variations:
         logging.info('Running variation %s', variation)
         global func_arguments
