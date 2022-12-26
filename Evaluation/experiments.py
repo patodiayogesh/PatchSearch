@@ -6,7 +6,7 @@ dataset_sizes = ['small']
 query_paths = ['train', 'eval', 'test']
 filenames = ['prev_code', 'buggy_only', 'commit_msg']
 methods = ['modit']
-model_ckpt = '../modit_checkpoints/small.parent_contexed_commit.child_code/checkpoint_best.pt'
+model_ckpt = '../../../shared/modit_checkpoints/small.parent_contexed_commit.child_code/checkpoint_best.pt'
 variations = []
 for dataset_size in dataset_sizes:
     for query_path in query_paths:
