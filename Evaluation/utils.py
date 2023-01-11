@@ -53,7 +53,7 @@ def set_filepaths(obj, basepath, dataset_size, db_path, query_path):
 
     query_filepaths = dict()
     query_folder_location = path.abspath(
-        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/" + query_path + "/"))
+        path.join(basepath, "../SequenceR-Dataset/" + dataset_size + "/" + query_path + "/"))
     obj.query_folder_location = query_folder_location
     query_filepaths['buggy_only'] = path.abspath(
         path.join(query_folder_location, "data.buggy_only"))
@@ -187,7 +187,7 @@ class Evaluator:
             return None
         else:
 
-            if 'train' in self.query_folder_location:
+            if 'train' in self.query_folder_location and self.db_folder_location==self.query_folder_location:
                 train_dataset = True
             else:
                 train_dataset = False
@@ -263,7 +263,7 @@ class Evaluator:
             return None
 
         # If Query is from train dataset
-        if 'train' in self.query_folder_location:
+        if 'train' in self.query_folder_location and self.db_folder_location==self.query_folder_location:
             train_dataset = True
         else:
             train_dataset = False
