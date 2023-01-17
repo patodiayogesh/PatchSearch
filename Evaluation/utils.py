@@ -37,7 +37,7 @@ def set_filepaths(obj, basepath, dataset_size, db_path, query_path):
     """
     db_filepaths = dict()
     db_folder_location = path.abspath(
-        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/" + db_path + "/"))
+        path.join(basepath, "../SequenceR-Dataset/" + dataset_size + "/" + db_path + "/"))
     obj.db_folder_location = db_folder_location
     db_filepaths['buggy_only'] = path.abspath(
         path.join(db_folder_location, "data.buggy_only"))

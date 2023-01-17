@@ -20,7 +20,7 @@ for dataset_size in dataset_sizes:
                         'db_path': db_path, 'query_path': query_path,
                         'db_data_filename': filename,
                         'query_filename': filename,
-                        'k': k,#k + 1 if 'train' == query_path else k,
+                        'k': k + 1 if 'train' == query_path else k,
                         'concatenate': False,
                         'method': method,
                         'model_ckpt': model_ckpt,

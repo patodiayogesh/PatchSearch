@@ -85,7 +85,7 @@ class PlBartEvaluator(Evaluator):
                                             return_tensors="pt").to(self.device)
             with torch.no_grad():
                 code_embeddings = self.model(**code_encodings)
-            code_embeddings = torch.mean(code_embeddings.encoder_last_hidden_state, dim=1)
+            code_embeddings = torch.mean(code_embeddings.last_hidden_state, dim=1)
             code_embeddings = code_embeddings.flatten()
 
             embeddings.append(code_embeddings.detach().cpu().numpy())
