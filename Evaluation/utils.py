@@ -37,7 +37,7 @@ def set_filepaths(obj, basepath, dataset_size, db_path, query_path):
     """
     db_filepaths = dict()
     db_folder_location = path.abspath(
-        path.join(basepath, "../SequenceR-Dataset/" + dataset_size + "/" + db_path + "/"))
+        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/" + db_path + "/"))
     obj.db_folder_location = db_folder_location
     db_filepaths['buggy_only'] = path.abspath(
         path.join(db_folder_location, "data.buggy_only"))
@@ -53,7 +53,7 @@ def set_filepaths(obj, basepath, dataset_size, db_path, query_path):
 
     query_filepaths = dict()
     query_folder_location = path.abspath(
-        path.join(basepath, "../SequenceR-Dataset/" + dataset_size + "/" + query_path + "/"))
+        path.join(basepath, "../Patch-Dataset/" + dataset_size + "/" + query_path + "/"))
     obj.query_folder_location = query_folder_location
     query_filepaths['buggy_only'] = path.abspath(
         path.join(query_folder_location, "data.buggy_only"))
@@ -122,7 +122,6 @@ class Evaluator:
             # db_data[0] = db_data[0][:100]
             # db_data[1] = db_data[1][:100]
             # db_data[1] = db_data[2][:100]
-            #
             # queries[0] = queries[0][:10]
             # queries[1] = queries[1][:10]
             # queries[2] = queries[2][:10]
@@ -134,7 +133,7 @@ class Evaluator:
             with open(self.query_filepaths[self.query_filename], 'r') as f:
                 queries = [line.rstrip() for line in f]
 
-            # db_data = db_data[:10]
+            # db_data = db_data[:20]
             # queries = queries[:10]
 
         self.db_data = db_data

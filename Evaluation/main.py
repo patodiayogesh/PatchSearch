@@ -5,6 +5,7 @@ import torch
 
 from tfidf import TfIdfEvaluator
 from plbart import PlBartEvaluator
+from bm25 import BM25Evaluator
 
 from experiments import variations
 from utils import set_filepaths, get_file_absolute_location
@@ -122,6 +123,14 @@ def evaluate(dataset_size,
                                         k,
                                         concatenate,
                                         model_ckpt=model_ckpt)
+    elif method == 'bm25':
+        evaluator_obj = BM25Evaluator(dataset_size,
+                                      None,
+                                      None,
+                                      db_data_filename,
+                                      query_filename,
+                                      k,
+                                      concatenate)
     else:
         print('Evaluator Method Undefined ', method)
         return None
@@ -133,8 +142,8 @@ def evaluate(dataset_size,
     evaluator_obj.set_data()
 
     compute_similarity_matrix_and_edit_dist_and_map_k_results(evaluator_obj, method)
-    del evaluator_obj.tokenizer
-    del evaluator_obj.model
+    # del evaluator_obj.tokenizer
+    # del evaluator_obj.model
     # compute_similarity_matrix_and_map_k_results(evaluator_obj, method)
     return None
 
@@ -145,7 +154,7 @@ def main():
     Saves all variation results
     :return: None
     """
-    logging.basicConfig(filename='modit_variations.log', filemode='w', level=logging.INFO)
+    logging.basicConfig(filename='bm25_variations.log', filemode='w', level=logging.INFO)
     for variation in variations:
         logging.info('Running variation %s', variation)
         global func_arguments

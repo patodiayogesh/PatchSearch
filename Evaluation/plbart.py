@@ -31,6 +31,9 @@ class PlBartEvaluator(Evaluator):
         if self.concatenate:
             n_data = len(self.db_data)
             for i, db_data in enumerate(self.db_data):
+                # this makes sure that all the modalities passed to the model
+                # are of the same length (e.g. for prev_code and buggy_only for
+                # max_size 1024, both will be of length 512)
                 self.db_data[i] = [data[:(self.tokenizer_max_length//n_data-1)]
                                    for data in db_data]
             for i, query_data in enumerate(self.queries):
