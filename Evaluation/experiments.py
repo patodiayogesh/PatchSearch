@@ -4,8 +4,8 @@ ks = [5]
 db_path = 'train'
 dataset_sizes = ['small']
 query_paths = ['train', 'eval', 'test']
-filenames = ['prev_code', 'buggy_only']
-methods = ['plbart']
+filenames = ['prev_code', 'buggy_only', 'commit_msg']
+methods = ['bm25']
 model_ckpt = None
 variations = []
 for dataset_size in dataset_sizes:
