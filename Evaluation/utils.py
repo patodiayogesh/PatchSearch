@@ -119,9 +119,9 @@ class Evaluator:
                 with open(self.query_filepaths[file], 'r') as f:
                     queries.append([line.rstrip() for line in f])
 
-            # db_data[0] = db_data[0][:100]
-            # db_data[1] = db_data[1][:100]
-            # db_data[1] = db_data[2][:100]
+            # db_data[0] = db_data[0][:20]
+            # db_data[1] = db_data[1][:20]
+            # db_data[1] = db_data[2][:20]
             # queries[0] = queries[0][:10]
             # queries[1] = queries[1][:10]
             # queries[2] = queries[2][:10]

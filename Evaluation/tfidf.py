@@ -1,11 +1,9 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 from gensim.models import TfidfModel
 from gensim.corpora import Dictionary
-from gensim.utils import simple_preprocess
-from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from gensim.matutils import corpus2dense, corpus2csc
-from utils import Evaluator
+from utils import Evaluator, concatenate_data
 from os.path import exists
 
 import torch
@@ -35,8 +33,14 @@ class TfIdfEvaluator(Evaluator):
         else:
             # Tfidf Vectorizer to fit on db data
             vectorizer = TfidfVectorizer()
-            db_data_vectors = vectorizer.fit_transform(self.db_data)
-            query_vectors = vectorizer.transform(self.queries)
+            db_data_vectors = vectorizer.fit_transform(
+                concatenate_data(self.db_data) if self.concatenate
+                else self.db_data
+            )
+            query_vectors = vectorizer.transform(
+                concatenate_data(self.queries) if self.concatenate
+                else self.queries
+            )
 
             # Get np array format of tfidf scores
             db_data_matrix = np.array(db_data_vectors.todense())

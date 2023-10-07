@@ -1,8 +1,5 @@
 import time
 from os import path
-
-import torch
-
 from tfidf import TfIdfEvaluator
 from plbart import PlBartEvaluator
 from bm25 import BM25Evaluator

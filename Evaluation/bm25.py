@@ -1,9 +1,10 @@
 from rank_bm25 import BM25Okapi
-from utils import Evaluator
+from utils import Evaluator, concatenate_data
 from os.path import exists
 import pickle
 import torch
 import numpy as np
+import re
 
 class BM25Evaluator(Evaluator):
 
@@ -12,8 +13,15 @@ class BM25Evaluator(Evaluator):
 
     def set_data(self):
         super().set_data()
+
         if self.concatenate:
-            pass
+            db_data = concatenate_data(self.db_data)
+            queries = concatenate_data(self.queries)
+            self.tokenized_db_data = [self.bm25_preprocess(data) for
+                                      data in db_data]
+            self.tokenized_queries = [self.bm25_preprocess(data) for
+                                      data in queries]
+
         else:
             self.tokenized_db_data = [self.bm25_preprocess(data) for
                                       data in self.db_data]
@@ -21,7 +29,7 @@ class BM25Evaluator(Evaluator):
                                       data in self.queries]
 
     def bm25_preprocess(self, data):
-        return data.split(" ")
+        return re.sub(' +', ' ', data).strip().split()
 
     def get_top_k_similarity_matrix(self,
                                     filename):
