@@ -79,11 +79,18 @@ class TfIdfEvaluator(Evaluator):
         else:
             # Tfidf Vectorizer to fit on db data
 
-            db_corpus, vocab_dict, vocab_size = self.gensim_tfidf_preprocess(self.db_data)
+            db_corpus, vocab_dict, vocab_size = self.gensim_tfidf_preprocess(
+                concatenate_data(self.db_data) if self.concatenate
+                else self.db_data
+            )
             tfidf_model = TfidfModel(db_corpus)
             db_data_vectors = tfidf_model[db_corpus]
             print('DB TfIdf scores obtained')
-            query_corpus, _, _ = self.gensim_tfidf_preprocess(self.queries, vocab_dict)
+            query_corpus, _, _ = self.gensim_tfidf_preprocess(
+                concatenate_data(self.queries) if self.concatenate
+                else self.queries,
+                vocab_dict
+            )
             query_vectors = tfidf_model[query_corpus]
             print('Query TfIdf scores obtained')
             # Get np array format of tfidf scores
