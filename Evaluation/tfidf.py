@@ -94,8 +94,12 @@ class TfIdfEvaluator(Evaluator):
             query_vectors = tfidf_model[query_corpus]
             print('Query TfIdf scores obtained')
             # Get np array format of tfidf scores
-            db_data_matrix = corpus2dense(db_data_vectors, vocab_size, len(self.db_data)).T
-            query_matrix = corpus2dense(query_vectors, vocab_size, len(self.queries)).T
+            db_data_matrix = corpus2dense(db_data_vectors, vocab_size,
+                                          len(self.db_data[0]) if self.concatenate else
+                                          len(self.db_data)).T
+            query_matrix = corpus2dense(query_vectors, vocab_size,
+                                        len(self.queries[0]) if self.concatenate else
+                                        len(self.queries)).T
 
             # print(db_data_matrix)
             # row = db_data_matrix[10]

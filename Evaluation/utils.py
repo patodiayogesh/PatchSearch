@@ -176,8 +176,8 @@ class Evaluator:
                                                                 visualization_filename
                                                                 )
 
-        if exists(edit_distance_filename):
-            print(edit_distance_filename, ' exists')
+        if exists(norm_edit_distance_filename):
+            print(norm_edit_distance_filename, ' exists')
             # edit_distances = []
             # f = open(edit_distance_filename, 'r')
             # for line in f:

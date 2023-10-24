@@ -2,10 +2,10 @@ variations = []
 
 ks = [5]
 db_path = 'train'
-dataset_sizes = ['small']
-query_paths = ['train', 'eval', 'test']
-filenames = ['prev_code', 'buggy_only', 'commit_msg']
-methods = ['bm25']
+dataset_sizes = ['small', 'medium']
+query_paths = ['test']
+filenames = [['prev_code', 'buggy_only'], ['prev_code', 'commit_msg'], ['buggy_only', 'commit_msg'], ['prev_code', 'buggy_only', 'commit_msg']]
+methods = ['tfidf']
 model_ckpt = None
 variations = []
 for dataset_size in dataset_sizes:
@@ -21,7 +21,7 @@ for dataset_size in dataset_sizes:
                         'db_data_filename': filename,
                         'query_filename': filename,
                         'k': k + 1 if 'train' == query_path else k,
-                        'concatenate': False,
+                        'concatenate': True,
                         'method': method,
                         'model_ckpt': model_ckpt,
                     }
